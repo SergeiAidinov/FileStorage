@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Client {
+public class Client implements Runnable{
 	private final Socket socket;
 	private final DataInputStream in;
 	private final DataOutputStream out;
@@ -21,10 +21,11 @@ public class Client {
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
-		runClient();
+		//runClient();
 	}
 
 	private void runClient() {
+		run();
 
 		/*
 		 * JFrame frame = new JFrame("Cloud Storage");
@@ -132,6 +133,12 @@ public class Client {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return "Received list of files on server.";
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
