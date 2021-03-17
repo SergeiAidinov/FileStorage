@@ -10,61 +10,56 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Client {
+public class Client implements Runnable{
 	private final Socket socket;
 	private final DataInputStream in;
 	private final DataOutputStream out;
-        JTextArea ta;
+	private final GraphicUserInterface gui;
+	//JTextArea ta;
 
 	public Client() throws IOException {
+		gui = new GraphicUserInterface(this);
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
-		runClient();
+		//runClient();
 	}
 
 	private void runClient() {
-		JFrame frame = new JFrame("Cloud Storage");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 300);
+		run();
 
-		ta = new JTextArea();
-		// TODO: 02.03.2021
-		// list targetFile - JList
-		JButton uploadButton = new JButton("Upload");
-                JButton deleteButton = new JButton("Delete");
-                JButton downloadButton = new JButton("Download");
-                JButton listOfFiles = new JButton("List");
-		frame.getContentPane().add(BorderLayout.CENTER, ta);
-                Container container = new Container();
-                container.setLayout(new FlowLayout());
-		container.add(uploadButton);
-                container.add(deleteButton);
-                container.add(downloadButton);
-                container.add(listOfFiles);
-                frame.getContentPane().add(BorderLayout.SOUTH, container);
-		frame.setVisible(true);
-		uploadButton.addActionListener(upl -> {
-			System.out.println(sendFile(ta.getText()));
-		});
-                deleteButton.addActionListener(dlt -> {
-                    System.out.println(deleteFile(ta.getText()));
-                });
-                downloadButton.addActionListener(dnl -> {
-                    System.out.println(downloadFile(ta.getText()));
-                });
-                listOfFiles.addActionListener(lst -> {
-                    System.out.println(showListOfFiles());
-                });
-                
+		/*
+		 * JFrame frame = new JFrame("Cloud Storage");
+		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); frame.setSize(400,
+		 * 300);
+		 * 
+		 * ta = new JTextArea(); // TODO: 02.03.2021 // list targetFile - JList JButton
+		 * uploadButton = new JButton("Upload"); JButton deleteButton = new
+		 * JButton("Delete"); JButton downloadButton = new JButton("Download"); JButton
+		 * listOfFiles = new JButton("List");
+		 * frame.getContentPane().add(BorderLayout.CENTER, ta); Container container =
+		 * new Container(); container.setLayout(new FlowLayout());
+		 * container.add(uploadButton); container.add(deleteButton);
+		 * container.add(downloadButton); container.add(listOfFiles);
+		 * frame.getContentPane().add(BorderLayout.SOUTH, container);
+		 * frame.setVisible(true); uploadButton.addActionListener(upl -> {
+		 * System.out.println(sendFile(ta.getText())); });
+		 * deleteButton.addActionListener(dlt -> {
+		 * System.out.println(deleteFile(ta.getText())); });
+		 * downloadButton.addActionListener(dnl -> {
+		 * System.out.println(downloadFile(ta.getText())); });
+		 * listOfFiles.addActionListener(lst -> { System.out.println(showListOfFiles());
+		 * });
+		 */
 	}
 
-	private String sendFile(String filename) {
-            FileInputStream fis = null;
-            if (filename.length() == 0) {
-                return("File name needed.");
-                
-            }
+	protected String sendFile(String filename) {
+		System.out.println("Sending file: " + filename);
+		FileInputStream fis = null;
+		if (filename.length() == 0) {
+			return ("File name needed.");
+
+		}
 		try {
 			File file = new File("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
 			if (file.exists()) {
@@ -80,68 +75,72 @@ public class Client {
 				}
 				out.flush();
 				String status = in.readUTF();
-                                fis.close();
+				fis.close();
 				return status;
 			} else {
 				return "File " + file + " does not exists";
-                                
+
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 		return "Something error";
-	} 
+	}
 
 	public static void main(String[] args) throws IOException {
+
 		new Client();
 	}
 
-    private String deleteFile(String filename) {
-        String status = null;
-            try {
-                out.writeUTF("remove");
-                out.writeUTF(filename);
-                status = in.readUTF();
-                
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                
-            }
-        return status;
-    }
+	protected String deleteFile(String filename) {
+		String status = null;
+		try {
+			out.writeUTF("remove");
+			out.writeUTF(filename);
+			status = in.readUTF();
 
-    private String downloadFile(String filename) {
-        ta.setText(null);
-        Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
-        Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
-        try (OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
-Files.copy(sourcePath, outputStream);
-} catch (IOException ex) {
-ex.printStackTrace();
-}
-            return "Downloaded file " + filename;
-}
-            
-    
+		} catch (IOException ex) {
+			ex.printStackTrace();
 
-    private String showListOfFiles() {
-        
-            try {
-                
-                try {
-                    out.writeUTF("listOfFiles");
-                } catch (IOException ex) {
-                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                String filesList = in.readUTF();
-                ta.setText(null);
-                ta.setText(filesList);
-                
-                
-            } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        return "Received list of files on server.";
-    }
-    
+		}
+		return status;
+	}
+
+	protected String downloadFile(String filename) {
+		gui.ta.setText(null);
+		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
+		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
+		try (OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
+			Files.copy(sourcePath, outputStream);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return "Downloaded file " + filename;
+	}
+
+	protected String showListOfFiles() {
+
+		try {
+
+			try {
+				out.writeUTF("listOfFiles");
+			} catch (IOException ex) {
+				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			String filesList = in.readUTF();
+			gui.ta.setText(null);
+			gui.ta.setText(filesList);
+
+		} catch (IOException ex) {
+			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return "Received list of files on server.";
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
