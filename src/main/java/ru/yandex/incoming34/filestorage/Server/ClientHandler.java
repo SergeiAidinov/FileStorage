@@ -33,9 +33,17 @@ public class ClientHandler implements Runnable {
 
 	@Override
 	public void run() {
+		String command;
 		try{	
                     while (true) {
-				String command = in.readUTF();
+                  
+                  try {
+				command = in.readUTF();
+                  } catch (EOFException eofEx) {
+      				continue;
+      			}
+				
+				 
                                 switch (command) {
                                     case "upload":
                                     {
@@ -61,9 +69,11 @@ public class ClientHandler implements Runnable {
                                 
                                 }
                     }
-                                }   catch (IOException ex) {
+                                }   
+		
+		catch (IOException ex) {
                 Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            } 
         }
                 
                 

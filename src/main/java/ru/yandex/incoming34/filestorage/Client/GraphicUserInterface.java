@@ -9,14 +9,14 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import ru.yandex.incoming34.filestorage.Client.Client;
 
-public class ClientGUI {
+public class GraphicUserInterface {
 	
 	
 	JFrame frame = new JFrame("Cloud Storage");
 	Client myClient = null;
 	JTextArea ta;
 	
-	public ClientGUI(Client myClient) {
+	public GraphicUserInterface(Client myClient) {
 		super();
 		this.myClient = myClient;
 	}
