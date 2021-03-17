@@ -14,10 +14,11 @@ public class Client implements Runnable{
 	private final Socket socket;
 	private final DataInputStream in;
 	private final DataOutputStream out;
-	JTextArea ta;
+	private final GraphicUserInterface gui;
+	//JTextArea ta;
 
 	public Client() throws IOException {
-		new GraphicUserInterface(this);
+		gui = new GraphicUserInterface(this);
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
@@ -53,6 +54,7 @@ public class Client implements Runnable{
 	}
 
 	protected String sendFile(String filename) {
+		System.out.println("Sending file: " + filename);
 		FileInputStream fis = null;
 		if (filename.length() == 0) {
 			return ("File name needed.");
@@ -105,7 +107,7 @@ public class Client implements Runnable{
 	}
 
 	protected String downloadFile(String filename) {
-		ta.setText(null);
+		gui.ta.setText(null);
 		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
 		try (OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
@@ -126,8 +128,8 @@ public class Client implements Runnable{
 				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			String filesList = in.readUTF();
-			ta.setText(null);
-			ta.setText(filesList);
+			gui.ta.setText(null);
+			gui.ta.setText(filesList);
 
 		} catch (IOException ex) {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
