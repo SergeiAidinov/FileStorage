@@ -17,6 +17,7 @@ public class Client {
         JTextArea ta;
 
 	public Client() throws IOException {
+		new ClientGUI(this);
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
@@ -24,6 +25,8 @@ public class Client {
 	}
 
 	private void runClient() {
+		
+	/*
 		JFrame frame = new JFrame("Cloud Storage");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(400, 300);
@@ -56,10 +59,10 @@ public class Client {
                 listOfFiles.addActionListener(lst -> {
                     System.out.println(showListOfFiles());
                 });
-                
-	}
+      */          
+	} 
 
-	private String sendFile(String filename) {
+	protected String sendFile(String filename) {
             FileInputStream fis = null;
             if (filename.length() == 0) {
                 return("File name needed.");
@@ -93,10 +96,11 @@ public class Client {
 	} 
 
 	public static void main(String[] args) throws IOException {
+		
 		new Client();
 	}
 
-    private String deleteFile(String filename) {
+    protected String deleteFile(String filename) {
         String status = null;
             try {
                 out.writeUTF("remove");
@@ -110,7 +114,7 @@ public class Client {
         return status;
     }
 
-    private String downloadFile(String filename) {
+    protected String downloadFile(String filename) {
         ta.setText(null);
         Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
         Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
@@ -124,7 +128,7 @@ ex.printStackTrace();
             
     
 
-    private String showListOfFiles() {
+    protected String showListOfFiles() {
         
             try {
                 
