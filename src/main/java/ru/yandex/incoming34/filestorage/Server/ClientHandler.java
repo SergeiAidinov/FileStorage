@@ -72,9 +72,12 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void performUpload() {
+		
 		FileOutputStream fos = null;
 		try {
 			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+			file = file.getCanonicalFile();
+			System.out.println("Uploaning file: " + file);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -87,7 +90,7 @@ public class ClientHandler implements Runnable {
 			}
 			fos.close();
 
-			out.writeUTF("DONE");
+			//out.writeUTF("DONE");
 		} catch (Exception e) {
 
 		}

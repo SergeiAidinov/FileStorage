@@ -51,8 +51,8 @@ public class GraphicUserInterface {
 		frame.setVisible(true);
 		uploadButton.addActionListener(upl -> {
 			// System.out.println(myClient.sendFile(textArea.getText()));
-			File file = new File ("/home/sergei/pom.xml");
-			myClient.sendFile(file);
+			//File file = new File ("/home/sergei/pom.xml");
+			//myClient.sendFile(file);
 			System.out.println(myClient.chooseAndSendFile());
 		});
 		deleteButton.addActionListener(dlt -> {
@@ -96,7 +96,9 @@ public class GraphicUserInterface {
 		fileChooser.setVisible(true);
 		int result = fileChooser.showOpenDialog(fileChooser);
 		if (result == JFileChooser.APPROVE_OPTION) {
-			return new File(fileChooser.getSelectedFile().toString());
+			File file = new File(fileChooser.getSelectedFile().getName());
+			System.out.println("Choosen file is " + file);
+			return file;
 		} else {
 			return null;
 		}
