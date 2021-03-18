@@ -63,9 +63,6 @@ public class ClientHandler implements Runnable {
 				}
 
 				}
-				/*if (out.size() > 0) {
-					out.flush();
-				} */
 			}
 		}
 
@@ -92,8 +89,9 @@ public class ClientHandler implements Runnable {
 				fos.write(buffer, 0, read);
 			}
 			fos.close();
-			out.writeUTF(file.getName() + " succesfully uploaded to server.");
-			out.flush();
+			instatntWriningIntoStream(file.getName() + " succesfully uploaded to server.");
+			//out.writeUTF(file.getName() + " succesfully uploaded to server.");
+			//out.flush();
 		} catch (Exception e) {
 
 		}
@@ -146,8 +144,9 @@ public class ClientHandler implements Runnable {
 				}
 				out.flush();
 				String status = in.readUTF();
-				out.writeUTF("download - Server" + file);
-				fis.close();
+				instatntWriningIntoStream("download - Server" + file);
+				//out.writeUTF("download - Server" + file);
+				//fis.close();
 
 			} else {
 				out.writeLong(0);
@@ -171,7 +170,6 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void showListOfFiles() {
-		try {
 			File dir = new File("/media/sergei/Linux/ServerFiles/");
 			File[] allFiles = dir.listFiles();
 			StringBuffer listOfFiles = new StringBuffer();
@@ -180,11 +178,18 @@ public class ClientHandler implements Runnable {
 				listOfFiles.append(oneFile).append("\n");
 				System.out.println(oneFile);
 			}
-			out.writeUTF(listOfFiles.toString());
-			out.flush();
-		} catch (IOException ex) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-		}
+			instatntWriningIntoStream(listOfFiles.toString());
 
+	}
+	
+	private void instatntWriningIntoStream(String message) {
+		try {
+			out.writeUTF(message);
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
+		}
+		
 	}
 }
