@@ -90,8 +90,8 @@ public class ClientHandler implements Runnable {
 			}
 			fos.close();
 			instatntWriningIntoStream(file.getName() + " succesfully uploaded to server.");
-			//out.writeUTF(file.getName() + " succesfully uploaded to server.");
-			//out.flush();
+			// out.writeUTF(file.getName() + " succesfully uploaded to server.");
+			// out.flush();
 		} catch (Exception e) {
 
 		}
@@ -125,11 +125,16 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void performDownload() {
-		File file;
+		//File file = null;
 		FileInputStream fis = null;
 		try {
-			file = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+			File fileFromStream = new File(/*"/media/sergei/Linux/ServerFiles" + File.separator + */in.readUTF());
+			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
+			//fullFileName.trim();
+			System.out.println("fulFileName: " + file + "END");
+			//file = new File(fullFileName);
 			if (Objects.isNull(file) || file.getName().length() == 0) {
+				System.out.println("ZERO");
 				out.writeLong(0);
 				return;
 			}
@@ -143,15 +148,13 @@ public class ClientHandler implements Runnable {
 					out.write(buffer, 0, read);
 				}
 				out.flush();
-				String status = in.readUTF();
 				instatntWriningIntoStream("download - Server" + file);
-				//out.writeUTF("download - Server" + file);
-				//fis.close();
+				fis.close();
 
 			} else {
 				out.writeLong(0);
 				System.out.println("File does not exist");
-				fis.close();
+				// fis.close();
 			}
 		} catch (NullPointerException nlex) {
 			if (fis != null) {
@@ -170,18 +173,18 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void showListOfFiles() {
-			File dir = new File("/media/sergei/Linux/ServerFiles/");
-			File[] allFiles = dir.listFiles();
-			StringBuffer listOfFiles = new StringBuffer();
-			for (int i = 0; i < allFiles.length; i++) {
-				String oneFile = allFiles[i].getName();
-				listOfFiles.append(oneFile).append("\n");
-				System.out.println(oneFile);
-			}
-			instatntWriningIntoStream(listOfFiles.toString());
+		File dir = new File("/media/sergei/Linux/ServerFiles/");
+		File[] allFiles = dir.listFiles();
+		StringBuffer listOfFiles = new StringBuffer();
+		for (int i = 0; i < allFiles.length; i++) {
+			String oneFile = allFiles[i].getName();
+			listOfFiles.append(oneFile).append("\n");
+			System.out.println(oneFile);
+		}
+		instatntWriningIntoStream(listOfFiles.toString());
 
 	}
-	
+
 	private void instatntWriningIntoStream(String message) {
 		try {
 			out.writeUTF(message);
@@ -190,6 +193,6 @@ public class ClientHandler implements Runnable {
 			// TODO Auto-generated catch block
 			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
 		}
-		
+
 	}
 }
