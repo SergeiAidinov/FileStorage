@@ -63,6 +63,9 @@ public class ClientHandler implements Runnable {
 				}
 
 				}
+				/*if (out.size() > 0) {
+					out.flush();
+				} */
 			}
 		}
 
@@ -72,7 +75,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void performUpload() {
-		
+
 		FileOutputStream fos = null;
 		try {
 			File fileFromStream = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
@@ -89,9 +92,8 @@ public class ClientHandler implements Runnable {
 				fos.write(buffer, 0, read);
 			}
 			fos.close();
-			
-
-			out.writeUTF("DONE");
+			out.writeUTF(file.getName() + " succesfully uploaded to server.");
+			out.flush();
 		} catch (Exception e) {
 
 		}
@@ -179,6 +181,7 @@ public class ClientHandler implements Runnable {
 				System.out.println(oneFile);
 			}
 			out.writeUTF(listOfFiles.toString());
+			out.flush();
 		} catch (IOException ex) {
 			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}

@@ -90,7 +90,7 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
-		gui.textArea.setText(null);
+		gui.informUser(null);
 		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
 		try (OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
@@ -111,8 +111,8 @@ public class Client implements Runnable {
 				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			String filesList = in.readUTF();
-			gui.textArea.setText(null);
-			gui.textArea.setText(filesList);
+			gui.informUser(null);
+			gui.informUser(filesList);
 
 		} catch (IOException ex) {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -122,7 +122,6 @@ public class Client implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -130,11 +129,18 @@ public class Client implements Runnable {
 		File currentFile = gui.openFileChooser();
 		if (!Objects.isNull(currentFile)) {
 			sendFile(currentFile);
+			try {
+				String serverAnawer = in.readUTF();
+				gui.informUser(serverAnawer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return "Choosen file: " + currentFile;
 		} else {
 			return "File was not selected.";
 		}
-		
+
 	}
 
 }

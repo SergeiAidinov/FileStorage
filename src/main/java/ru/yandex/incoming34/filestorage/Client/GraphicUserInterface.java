@@ -20,7 +20,7 @@ public class GraphicUserInterface {
 
 	JFrame frame = new JFrame("Cloud Storage");
 	Client myClient = null;
-	JTextArea textArea;
+	private JTextArea textArea;
 
 	public GraphicUserInterface(Client myClient) {
 		super();
@@ -79,4 +79,9 @@ public class GraphicUserInterface {
 		}
 
 	}
+
+	public void informUser(String message) {
+		textArea.setText(message);
+	}
+
 }
