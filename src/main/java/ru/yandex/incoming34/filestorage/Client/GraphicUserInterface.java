@@ -51,6 +51,8 @@ public class GraphicUserInterface {
 		frame.setVisible(true);
 		uploadButton.addActionListener(upl -> {
 			// System.out.println(myClient.sendFile(textArea.getText()));
+			File file = new File ("/home/sergei/pom.xml");
+			myClient.sendFile(file);
 			System.out.println(myClient.chooseAndSendFile());
 		});
 		deleteButton.addActionListener(dlt -> {

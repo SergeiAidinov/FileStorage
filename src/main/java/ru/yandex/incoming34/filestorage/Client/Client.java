@@ -35,7 +35,7 @@ public class Client implements Runnable {
 
 	}
 
-	protected String sendFile(String filename) {
+	protected String sendFile(File filename) {
 		System.out.println("Sending file: " + filename);
 		FileInputStream fis = null;
 		if (filename.length() == 0) {
@@ -43,10 +43,11 @@ public class Client implements Runnable {
 
 		}
 		try {
-			File file = new File(/*"/media/sergei/Linux/ClientFiles/" + File.separator + */filename);
+			File file = filename;//new File(/*"/media/sergei/Linux/ClientFiles/" + File.separator + */filename);
 			if (file.exists()) {
+				System.out.println("Transmitting file: " + filename.getName());
 				out.writeUTF("upload");
-				out.writeUTF(filename);
+				out.writeUTF(filename.toString());
 				long length = file.length();
 				out.writeLong(length);
 				fis = new FileInputStream(file);
@@ -54,10 +55,12 @@ public class Client implements Runnable {
 				byte[] buffer = new byte[256];
 				while ((read = fis.read(buffer)) != -1) {
 					out.write(buffer, 0, read);
+					System.out.print('.');
 				}
 				out.flush();
-				String status = in.readUTF();
+				String status = "String"; //in.readUTF();
 				fis.close();
+				System.out.println("File transmitted.");
 				return status;
 			} else {
 				return "File " + file + " does not exists";
@@ -128,7 +131,7 @@ public class Client implements Runnable {
 	public String chooseAndSendFile() {
 		File currentFile = gui.openFileChooser();
 		if (!Objects.isNull(currentFile)) {
-			sendFile(currentFile.toString());
+			sendFile(currentFile);
 			return "Chooser " + currentFile;
 		} else {
 			return "File was not selected.";
