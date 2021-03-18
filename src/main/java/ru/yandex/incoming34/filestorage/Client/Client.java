@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +43,7 @@ public class Client implements Runnable {
 
 		}
 		try {
-			File file = new File("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
+			File file = new File(/*"/media/sergei/Linux/ClientFiles/" + File.separator + */filename);
 			if (file.exists()) {
 				out.writeUTF("upload");
 				out.writeUTF(filename);
@@ -65,7 +66,7 @@ public class Client implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return "Something error";
+		return "Some error";
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -125,8 +126,14 @@ public class Client implements Runnable {
 	}
 
 	public String chooseAndSendFile() {
-		gui.openFileChooser();
-		return "Chooser";
+		File currentFile = gui.openFileChooser();
+		if (!Objects.isNull(currentFile)) {
+			sendFile(currentFile.toString());
+			return "Chooser " + currentFile;
+		} else {
+			return "File was not selected.";
+		}
+		
 	}
 
 }

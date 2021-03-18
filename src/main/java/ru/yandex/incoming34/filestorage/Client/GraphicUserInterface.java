@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Path;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -63,46 +65,39 @@ public class GraphicUserInterface {
 
 	}
 
-	public void openFileChooser() {
-		
+	public File openFileChooser() {
+
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fileChooser.setBounds(100, 1000, 900, 700);;
-		
-		/*JFrame chooseFrame = new JFrame();
-		chooseFrame.setSize(800, 600);
-		chooseFrame.setLayout(new BorderLayout());
-		Container buttons = new Container();
-		buttons.setLayout(new FlowLayout());
-		JButton choose = new JButton("Choose");
-		JButton cancel = new JButton("Cancel");
-		buttons.add(choose);
-		buttons.add(cancel);
-		JPanel chooserPanel = new JPanel();
-		chooseFrame.add(BorderLayout.SOUTH, buttons);
-		chooseFrame.add(BorderLayout.CENTER, fileChooser);
-		chooseFrame.getContentPane().add(chooserPanel); */
-		//chooseFrame.setVisible(true);
-		
-		/*choose.addActionListener(
-				
-			//	new ActionListener() {
 
-			@Override
-			/* public void actionPerformed(ActionEvent chs) { */
-				fileChooser.setDialogTitle("Select file");
-				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				fileChooser.setVisible(true);
-				int result = fileChooser.showOpenDialog(fileChooser);
-				if (result == JFileChooser.APPROVE_OPTION) {
-					JOptionPane.showMessageDialog(fileChooser, fileChooser.getSelectedFile());
-				}
+		/*
+		 * JFrame chooseFrame = new JFrame(); chooseFrame.setSize(800, 600);
+		 * chooseFrame.setLayout(new BorderLayout()); Container buttons = new
+		 * Container(); buttons.setLayout(new FlowLayout()); JButton choose = new
+		 * JButton("Choose"); JButton cancel = new JButton("Cancel");
+		 * buttons.add(choose); buttons.add(cancel); JPanel chooserPanel = new JPanel();
+		 * chooseFrame.add(BorderLayout.SOUTH, buttons);
+		 * chooseFrame.add(BorderLayout.CENTER, fileChooser);
+		 * chooseFrame.getContentPane().add(chooserPanel);
+		 */
+		// chooseFrame.setVisible(true);
 
-			//}
-
-		//}
-				//)
-;
+		/*
+		 * choose.addActionListener(
+		 * 
+		 * // new ActionListener() {
+		 * 
+		 * @Override /* public void actionPerformed(ActionEvent chs) {
+		 */
+		fileChooser.setDialogTitle("Select file");
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setVisible(true);
+		int result = fileChooser.showOpenDialog(fileChooser);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			return new File(fileChooser.getSelectedFile().toString());
+		} else {
+			return null;
+		}
 
 	}
 }
