@@ -96,7 +96,7 @@ public class GraphicUserInterface {
 		fileChooser.setVisible(true);
 		int result = fileChooser.showOpenDialog(fileChooser);
 		if (result == JFileChooser.APPROVE_OPTION) {
-			File file = new File(fileChooser.getSelectedFile().getName());
+			File file = new File(fileChooser.getSelectedFile().toString());
 			System.out.println("Choosen file is " + file);
 			return file;
 		} else {
