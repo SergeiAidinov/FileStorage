@@ -94,17 +94,6 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
-		/*
-		 * 
-		 * gui.informUser(null); filename.trim(); filename =
-		 * filename.replaceAll("[^\\w|\\d|!|?|-|_|.|' ']", "");
-		 * System.out.println("filename length: " + filename.length()); Path targetPath
-		 * = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
-		 * Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" +
-		 * File.separator + filename); try (OutputStream outputStream = new
-		 * FileOutputStream(targetPath.toFile())) { Files.copy(sourcePath,
-		 * outputStream); } catch (IOException ex) { ex.printStackTrace(); }
-		 */
 
 		try {
 			out.writeUTF("download");
@@ -117,19 +106,12 @@ public class Client implements Runnable {
 
 		long size;
 		try {
-			
+
 			File file = new File("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			if (!file.exists()) {
 				file.createNewFile();
 				System.out.println("Created file: " + file);
 			}
-			//Path targetPath = Paths.get(file.toString());
-			//System.out.println("targetPath: " + targetPath);
-			//BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
-			// FileOutputStream fos = new FileOutputStream(filename);
-			//FileInputStream fileInputStream = new FileInputStream(filename);
-			// ;
-
 			byte[] buffer = new byte[256];
 			int read = 0;
 			FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -137,24 +119,13 @@ public class Client implements Runnable {
 			for (int i = 0; i < (size + 255) / 256; i++) {
 				read = in.read(buffer);
 				fileOutputStream.write(buffer, 0, read);
-				
-				
+
 			}
 			fileOutputStream.close();
-			//Files.write(targetPath, buffer));
-			//writer.flush();
-			//System.out.println("File is read: " + writer);
-			
-
-			// OutputStream fileOutputStream = new FileOutputStream(targetPath.toFile());
-			
-			// fileOutputStream.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// instatntWriningIntoStream(filename + " succesfully downloaded to client's
-		// folder.");
+		gui.informUser(filename + " succesfully downloaded to client's");
 
 		return "Downloaded file " + filename;
 	}
