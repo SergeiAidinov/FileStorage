@@ -3,18 +3,12 @@ package ru.yandex.incoming34.filestorage.Client;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.nio.file.Path;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import ru.yandex.incoming34.filestorage.Client.Client;
 
 public class GraphicUserInterface {
 

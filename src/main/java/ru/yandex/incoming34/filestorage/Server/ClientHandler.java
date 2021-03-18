@@ -1,13 +1,14 @@
 package ru.yandex.incoming34.filestorage.Server;
 
-import java.awt.List;
-import java.io.*;
-import static java.lang.String.valueOf;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,29 +91,27 @@ public class ClientHandler implements Runnable {
 			}
 			fos.close();
 			instatntWriningIntoStream(file.getName() + " succesfully uploaded to server.");
-			// out.writeUTF(file.getName() + " succesfully uploaded to server.");
-			// out.flush();
 		} catch (Exception e) {
 
 		}
 	}
 
 	private void performRemove() {
-		File file;
 		try {
-			file = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
 			if (Objects.isNull(file) || file.getName().length() == 0) {
+				instatntWriningIntoStream("There is no such a file");
 				return;
 			}
 			if (file.exists()) {
 				boolean fileDeleted = file.delete();
 				if (fileDeleted) {
-					out.writeUTF("File " + file + " was deleted.");
+					instatntWriningIntoStream("File " + file.getName() + " was deleted.");
 				} else {
-					out.writeUTF("File " + file + " was NOT deleted.");
+					instatntWriningIntoStream("File " + file.getName() + " was NOT deleted.");
 				}
 			} else {
-				out.writeUTF("File does not exist.");
+				instatntWriningIntoStream("File does not exist.");
 			}
 
 		} catch (FileNotFoundException e) {
@@ -125,14 +124,11 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void performDownload() {
-		//File file = null;
 		FileInputStream fis = null;
 		try {
-			File fileFromStream = new File(/*"/media/sergei/Linux/ServerFiles" + File.separator + */in.readUTF());
+			File fileFromStream = new File(in.readUTF());
 			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
-			//fullFileName.trim();
 			System.out.println("fulFileName: " + file + "END");
-			//file = new File(fullFileName);
 			if (Objects.isNull(file) || file.getName().length() == 0) {
 				System.out.println("ZERO");
 				out.writeLong(0);
@@ -154,7 +150,6 @@ public class ClientHandler implements Runnable {
 			} else {
 				out.writeLong(0);
 				System.out.println("File does not exist");
-				// fis.close();
 			}
 		} catch (NullPointerException nlex) {
 			if (fis != null) {
@@ -190,7 +185,6 @@ public class ClientHandler implements Runnable {
 			out.writeUTF(message);
 			out.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
 		}
 

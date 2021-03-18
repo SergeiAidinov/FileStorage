@@ -85,7 +85,7 @@ public class Client implements Runnable {
 			out.writeUTF("remove");
 			out.writeUTF(filename);
 			status = in.readUTF();
-
+			gui.informUser(status);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 
