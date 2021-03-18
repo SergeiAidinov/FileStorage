@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import ru.yandex.incoming34.filestorage.Client.Client;
@@ -63,11 +64,15 @@ public class GraphicUserInterface {
 	}
 
 	public void openFileChooser() {
+		
 		JFileChooser fileChooser = new JFileChooser();
-		JFrame chooseFrame = new JFrame();
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setBounds(100, 1000, 900, 700);;
+		
+		/*JFrame chooseFrame = new JFrame();
 		chooseFrame.setSize(800, 600);
 		chooseFrame.setLayout(new BorderLayout());
-		Container buttons= new Container();
+		Container buttons = new Container();
 		buttons.setLayout(new FlowLayout());
 		JButton choose = new JButton("Choose");
 		JButton cancel = new JButton("Cancel");
@@ -75,23 +80,29 @@ public class GraphicUserInterface {
 		buttons.add(cancel);
 		JPanel chooserPanel = new JPanel();
 		chooseFrame.add(BorderLayout.SOUTH, buttons);
-		//chooserPanel.add(choose);
-		//chooserPanel.add(cancel);
+		chooseFrame.add(BorderLayout.CENTER, fileChooser);
+		chooseFrame.getContentPane().add(chooserPanel); */
+		//chooseFrame.setVisible(true);
 		
-		chooseFrame.getContentPane().add(chooserPanel);
-		chooseFrame.setVisible(true);
-		choose.addActionListener(new ActionListener() {
+		/*choose.addActionListener(
+				
+			//	new ActionListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent chs) {
+			/* public void actionPerformed(ActionEvent chs) { */
 				fileChooser.setDialogTitle("Select file");
 				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fileChooser.setVisible(true);
-				fileChooser.showOpenDialog(fileChooser);
+				int result = fileChooser.showOpenDialog(fileChooser);
+				if (result == JFileChooser.APPROVE_OPTION) {
+					JOptionPane.showMessageDialog(fileChooser, fileChooser.getSelectedFile());
+				}
 
-			}
+			//}
 
-		});
+		//}
+				//)
+;
 
 	}
 }
