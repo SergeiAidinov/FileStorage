@@ -8,7 +8,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -123,8 +131,8 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private void performDownload() {
-		FileInputStream fis = null;
+	private void performDownload() throws IOException {
+		/*FileInputStream fis = null;
 		try {
 			File fileFromStream = new File(in.readUTF());
 			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
@@ -144,7 +152,7 @@ public class ClientHandler implements Runnable {
 					out.write(buffer, 0, read);
 				}
 				out.flush();
-				instatntWriningIntoStream("download - Server" + file);
+				//instatntWriningIntoStream("download - Server" + file);
 				fis.close();
 
 			} else {
@@ -152,19 +160,27 @@ public class ClientHandler implements Runnable {
 				System.out.println("File does not exist");
 			}
 		} catch (NullPointerException nlex) {
-			if (fis != null) {
+			/*if (fis != null) {
 				try {
 					fis.close();
 				} catch (IOException ex) {
 					Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-			nlex.printStackTrace();
-		}
-
-		catch (IOException ex) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-		}
+				} 
+			//} 
+			//nlex.printStackTrace();
+		*/
+		
+		File fileFromStream = new File(in.readUTF());
+		File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
+		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
+		System.out.println("sourcePath: " + sourcePath);
+		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.bind(new InetSocketAddress(1235));
+        SocketChannel socketChannel = serverSocketChannel.accept();
+        FileChannel fileChannel = FileChannel.open(sourcePath, StandardOpenOption.READ);
+		fileChannel.transferTo(Long.MAX_VALUE, 0, socketChannel);
+		System.out.println("performDownload() FINISHED");
+		//}
 	}
 
 	private void showListOfFiles() {

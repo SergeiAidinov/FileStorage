@@ -6,10 +6,17 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -94,39 +101,72 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
+		System.out.println("downloadFile BEGIN");
+		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
+        try (SocketChannel socketChannel = SocketChannel.open(serverAddress)) {
 
-		try {
-			out.writeUTF("download");
-			out.writeUTF(filename);
+            RandomAccessFile file = new RandomAccessFile("/media/sergei/Linux/ClientFiles" + 
+            File.separator + filename, "rw");
+            FileChannel channel = file.getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate(256);
 
-		} catch (IOException ex) {
-			ex.printStackTrace();
-
-		}
-
-		long size;
-		try {
-
-			File file = new File("/media/sergei/Linux/ClientFiles" + File.separator + filename);
-			if (!file.exists()) {
-				file.createNewFile();
-				System.out.println("Created file: " + file);
+            int bytesRead = channel.read(buffer);
+            while (bytesRead > -1) {
+            	System.out.print('.');
+                buffer.flip();
+                while (buffer.hasRemaining()) { 
+                    socketChannel.write(buffer);
+                }
+                
+                bytesRead = channel.read(buffer);
+                file.write(bytesRead);
+                buffer.clear();
+            }
+            
+            
+            file.close();
+        }
+			//position += channel.transferFrom(channel, position, size);
+ catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			byte[] buffer = new byte[256];
-			int read = 0;
+			
+			
+			//fileWriter.transfer(channel, size);
+			
+			
+			//fileWriter.transfer(channel, size);
+			
+			
+			//fileWriter.transfer(channel, size);
+			//fileWriter.close();
+			/*
+			 * if (!file.exists()) { file.createNewFile();
+			 * System.out.println("Created file: " + file); }
+			 */
+			// byte[] buffer = new byte[256];
+			// int read = 0;
+			/*
 			FileOutputStream fileOutputStream = new FileOutputStream(file);
-			size = in.readLong();
-			for (int i = 0; i < (size + 255) / 256; i++) {
-				read = in.read(buffer);
-				fileOutputStream.write(buffer, 0, read);
-
-			}
+			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
+			
+			 * long size = in.readLong(); for (int i = 0; i < (size + 255) / 256; i++) {
+			 * read = in.read(buffer);
+			 * 
+			 * }
+			 
+			OutputStream os = new FileOutputStream(sourcePath.toFile());
+			Files.copy(targetPath, os);
+			// Files.write(targetPath, sourcePath);
+			fileOutputStream.flush();
 			fileOutputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		gui.informUser(filename + " succesfully downloaded to client's");
+			*/
+			System.out.println("downloadFile FINISHED");
 
+		
+
+		gui.informUser("DONE" /* filename + " succesfully downloaded to client's" */);
 		return "Downloaded file " + filename;
 	}
 
