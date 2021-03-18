@@ -20,14 +20,12 @@ public class Client implements Runnable {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
-	// JTextArea textArea;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
-		// runClient();
 	}
 
 	private void runClient() {
@@ -43,7 +41,7 @@ public class Client implements Runnable {
 
 		}
 		try {
-			File file = filename;//new File(/*"/media/sergei/Linux/ClientFiles/" + File.separator + */filename);
+			File file = filename;
 			if (file.exists()) {
 				System.out.println("Transmitting file: " + filename.getName());
 				out.writeUTF("upload");
@@ -58,7 +56,7 @@ public class Client implements Runnable {
 					System.out.print('.');
 				}
 				out.flush();
-				String status = "String"; //in.readUTF();
+				String status = "String";
 				fis.close();
 				System.out.println("File transmitted.");
 				return status;
@@ -132,7 +130,7 @@ public class Client implements Runnable {
 		File currentFile = gui.openFileChooser();
 		if (!Objects.isNull(currentFile)) {
 			sendFile(currentFile);
-			return "Chooser " + currentFile;
+			return "Choosen file: " + currentFile;
 		} else {
 			return "File was not selected.";
 		}

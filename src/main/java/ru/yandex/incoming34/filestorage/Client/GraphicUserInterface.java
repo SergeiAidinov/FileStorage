@@ -34,8 +34,6 @@ public class GraphicUserInterface {
 		frame.setSize(400, 300);
 
 		textArea = new JTextArea();
-		// TODO: 02.03.2021
-		// list targetFile - JList
 		JButton uploadButton = new JButton("Upload");
 		JButton deleteButton = new JButton("Delete");
 		JButton downloadButton = new JButton("Download");
@@ -50,9 +48,6 @@ public class GraphicUserInterface {
 		frame.getContentPane().add(BorderLayout.SOUTH, container);
 		frame.setVisible(true);
 		uploadButton.addActionListener(upl -> {
-			// System.out.println(myClient.sendFile(textArea.getText()));
-			//File file = new File ("/home/sergei/pom.xml");
-			//myClient.sendFile(file);
 			System.out.println(myClient.chooseAndSendFile());
 		});
 		deleteButton.addActionListener(dlt -> {
@@ -71,26 +66,6 @@ public class GraphicUserInterface {
 
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-		/*
-		 * JFrame chooseFrame = new JFrame(); chooseFrame.setSize(800, 600);
-		 * chooseFrame.setLayout(new BorderLayout()); Container buttons = new
-		 * Container(); buttons.setLayout(new FlowLayout()); JButton choose = new
-		 * JButton("Choose"); JButton cancel = new JButton("Cancel");
-		 * buttons.add(choose); buttons.add(cancel); JPanel chooserPanel = new JPanel();
-		 * chooseFrame.add(BorderLayout.SOUTH, buttons);
-		 * chooseFrame.add(BorderLayout.CENTER, fileChooser);
-		 * chooseFrame.getContentPane().add(chooserPanel);
-		 */
-		// chooseFrame.setVisible(true);
-
-		/*
-		 * choose.addActionListener(
-		 * 
-		 * // new ActionListener() {
-		 * 
-		 * @Override /* public void actionPerformed(ActionEvent chs) {
-		 */
 		fileChooser.setDialogTitle("Select file");
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setVisible(true);

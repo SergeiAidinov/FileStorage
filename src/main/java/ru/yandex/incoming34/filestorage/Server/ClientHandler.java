@@ -89,8 +89,9 @@ public class ClientHandler implements Runnable {
 				fos.write(buffer, 0, read);
 			}
 			fos.close();
+			
 
-			//out.writeUTF("DONE");
+			out.writeUTF("DONE");
 		} catch (Exception e) {
 
 		}
