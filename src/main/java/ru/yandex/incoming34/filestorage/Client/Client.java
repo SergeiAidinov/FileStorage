@@ -1,8 +1,12 @@
 package ru.yandex.incoming34.filestorage.Client;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,47 +14,24 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Client implements Runnable{
+public class Client implements Runnable {
 	private final Socket socket;
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
-	//JTextArea ta;
+	// JTextArea ta;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
 		socket = new Socket("localhost", 1235);
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
-		//runClient();
+		// runClient();
 	}
 
 	private void runClient() {
 		run();
 
-		/*
-		 * JFrame frame = new JFrame("Cloud Storage");
-		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); frame.setSize(400,
-		 * 300);
-		 * 
-		 * ta = new JTextArea(); // TODO: 02.03.2021 // list targetFile - JList JButton
-		 * uploadButton = new JButton("Upload"); JButton deleteButton = new
-		 * JButton("Delete"); JButton downloadButton = new JButton("Download"); JButton
-		 * listOfFiles = new JButton("List");
-		 * frame.getContentPane().add(BorderLayout.CENTER, ta); Container container =
-		 * new Container(); container.setLayout(new FlowLayout());
-		 * container.add(uploadButton); container.add(deleteButton);
-		 * container.add(downloadButton); container.add(listOfFiles);
-		 * frame.getContentPane().add(BorderLayout.SOUTH, container);
-		 * frame.setVisible(true); uploadButton.addActionListener(upl -> {
-		 * System.out.println(sendFile(ta.getText())); });
-		 * deleteButton.addActionListener(dlt -> {
-		 * System.out.println(deleteFile(ta.getText())); });
-		 * downloadButton.addActionListener(dnl -> {
-		 * System.out.println(downloadFile(ta.getText())); });
-		 * listOfFiles.addActionListener(lst -> { System.out.println(showListOfFiles());
-		 * });
-		 */
 	}
 
 	protected String sendFile(String filename) {
@@ -140,7 +121,7 @@ public class Client implements Runnable{
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
