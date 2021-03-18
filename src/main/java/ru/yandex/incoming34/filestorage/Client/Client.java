@@ -19,7 +19,7 @@ public class Client implements Runnable {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
-	// JTextArea ta;
+	// JTextArea textArea;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
@@ -88,7 +88,7 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
-		gui.ta.setText(null);
+		gui.textArea.setText(null);
 		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles/" + File.separator + filename);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles/" + File.separator + filename);
 		try (OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
@@ -109,8 +109,8 @@ public class Client implements Runnable {
 				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			String filesList = in.readUTF();
-			gui.ta.setText(null);
-			gui.ta.setText(filesList);
+			gui.textArea.setText(null);
+			gui.textArea.setText(filesList);
 
 		} catch (IOException ex) {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -122,6 +122,11 @@ public class Client implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public String chooseAndSendFile() {
+		gui.openFileChooser();
+		return "Chooser";
 	}
 
 }
