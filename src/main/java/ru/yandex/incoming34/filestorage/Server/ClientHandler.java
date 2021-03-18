@@ -132,46 +132,11 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void performDownload() throws IOException {
-		/*FileInputStream fis = null;
-		try {
-			File fileFromStream = new File(in.readUTF());
-			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
-			System.out.println("fulFileName: " + file + "END");
-			if (Objects.isNull(file) || file.getName().length() == 0) {
-				System.out.println("ZERO");
-				out.writeLong(0);
-				return;
-			}
-			if (file.exists()) {
-				fis = new FileInputStream(file);
-				long length = file.length();
-				out.writeLong(length);
-				int read = 0;
-				byte[] buffer = new byte[256];
-				while ((read = fis.read(buffer)) != -1) {
-					out.write(buffer, 0, read);
-				}
-				out.flush();
-				//instatntWriningIntoStream("download - Server" + file);
-				fis.close();
-
-			} else {
-				out.writeLong(0);
-				System.out.println("File does not exist");
-			}
-		} catch (NullPointerException nlex) {
-			/*if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException ex) {
-					Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-				} 
-			//} 
-			//nlex.printStackTrace();
-		*/
+		System.out.println("performDownload() BEGIN");
+		
 		
 		File fileFromStream = new File(in.readUTF());
-		File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
+		//File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
 		System.out.println("sourcePath: " + sourcePath);
 		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
