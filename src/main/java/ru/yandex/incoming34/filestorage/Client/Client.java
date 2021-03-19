@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -99,34 +100,46 @@ public class Client implements Runnable {
 		try {
 			out.writeUTF("download");
 			out.writeUTF(filename);
-			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.pathSeparator + filename);
+			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
+			System.out.println("targetPath: " + targetPath);
 			File targetFile = new File(targetPath.toString());
-			InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
-			SocketChannel sourceChannel = SocketChannel.open(serverAddress);
-			FileChannel targetFileChannel = (FileChannel) Files.newByteChannel(targetPath, StandardOpenOption.WRITE,
-					StandardOpenOption.CREATE);
-			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
-			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
 			if (!targetFile.exists()) {
 				targetFile.createNewFile();
 			}
+			// ServerSocketChannel serverAddress = new InetSocketAddress(1235);
+			// SocketChannel sourceChannel = SocketChannel.open(serverAddress);
+			// SocketChannel sourceChanel =
+			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
+			SocketChannel sourceChannel = serverSocketChannel.accept();
+			System.out.println("sourceChannel: " + sourceChannel);
+			// FileChannel targetFileChannel = (FileChannel)
+			// Files.newByteChannel(targetPath, StandardOpenOption.WRITE,
+			// StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
+			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
+			System.out.println("buffer: " + buffer);
 			int lastByte = sourceChannel.read(buffer);
+			System.out.println("lastByte" + lastByte);
 			while (lastByte != -1) {
 				buffer.flip();
 				while (buffer.hasRemaining()) {
 					System.out.print((char) buffer.get());
 				}
+
 				targetFileChannel.write(buffer);
 				System.out.println("In byffer: " + buffer.limit());
-				buffer.clear();
-				// lastByte = targetFileChannel.read(buffer);
-				// while (buffer.hasRemaining()) {
+				buffer.clear(); // 
+				lastByte = targetFileChannel.read(buffer); // 
+				while (buffer.hasRemaining()) {
 				buffer.rewind();
 				targetFileChannel.write(buffer);
 				buffer.clear();
-				// }
+
+			}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
