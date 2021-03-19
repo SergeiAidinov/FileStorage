@@ -170,6 +170,7 @@ public class ClientHandler implements Runnable {
 			buffer.clear();
 			lastByte = outputChannel.read(buffer);
 		}
+		outputChannel.close();
 		System.out.println("performDownload() FINISHED");
 	}
 

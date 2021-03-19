@@ -1,5 +1,6 @@
 package ru.yandex.incoming34.filestorage.Client;
 
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -7,8 +8,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -93,72 +97,75 @@ public class Client implements Runnable {
 	protected String downloadFile(String filename) {
 		System.out.println("downloadFile BEGIN");
 		try {
-		out.writeUTF("download");
-		out.writeUTF(filename);
-		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.pathSeparator + filename);
-		File targetFile = new File (targetPath.toString());
-		if (targetFile.exists()) {
-			targetFile.createNewFile();
-		}
-		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
-		
-			FileChannel inputFileChannel = FileChannel.open(targetPath, StandardOpenOption.CREATE_NEW,
-					StandardOpenOption.WRITE);
+			out.writeUTF("download");
+			out.writeUTF(filename);
+			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.pathSeparator + filename);
+			File targetFile = new File(targetPath.toString());
+			InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
 			SocketChannel sourceChannel = SocketChannel.open(serverAddress);
+			FileChannel targetFileChannel = (FileChannel) Files.newByteChannel(targetPath, StandardOpenOption.WRITE,
+					StandardOpenOption.CREATE);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
-			long position = 0;
-			/*
-			do {
-				
-				inputFileChannel.transferFrom(sourceChannel, position, 1_000_000_000);
-				System.out.println("position: " + position);
-				position++;
-			} while (true);
-			*/
+			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
+			if (!targetFile.exists()) {
+				targetFile.createNewFile();
+			}
+
+			ByteBuffer buffer = ByteBuffer.allocate(256);
+			int lastByte = sourceChannel.read(buffer);
+			while (lastByte != -1) {
+				buffer.flip();
+				while (buffer.hasRemaining()) {
+					System.out.print((char) buffer.get());
+				}
+				targetFileChannel.write(buffer);
+				System.out.println("In byffer: " + buffer.limit());
+				buffer.clear();
+				// lastByte = targetFileChannel.read(buffer);
+				// while (buffer.hasRemaining()) {
+				buffer.rewind();
+				targetFileChannel.write(buffer);
+				buffer.clear();
+				// }
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("downloadFile END");
 		return filename;
-		}
-		
-		
-			
-		
-		
-		
+	}
 
-		// fileWriter.transfer(channel, size);
+	// fileWriter.transfer(channel, size);
 
-		// fileWriter.transfer(channel, size);
+	// fileWriter.transfer(channel, size);
 
-		// fileWriter.transfer(channel, size);
-		// fileWriter.close();
-		/*
-		 * if (!file.exists()) { file.createNewFile();
-		 * System.out.println("Created file: " + file); }
-		 */
-		// byte[] buffer = new byte[256];
-		// int read = 0;
-		/*
-		 * FileOutputStream fileOutputStream = new FileOutputStream(file);
-		 * BufferedWriter writer = Files.newBufferedWriter(targetPath,
-		 * Charset.forName("UTF-8"));
-		 * 
-		 * long size = in.readLong(); for (int i = 0; i < (size + 255) / 256; i++) {
-		 * read = in.read(buffer);
-		 * 
-		 * }
-		 * 
-		 * OutputStream os = new FileOutputStream(sourcePath.toFile());
-		 * Files.copy(targetPath, os); // Files.write(targetPath, sourcePath);
-		 * fileOutputStream.flush(); fileOutputStream.close();
-		 */
-		//System.out.println("downloadFile FINISHED");
+	// fileWriter.transfer(channel, size);
+	// fileWriter.close();
+	/*
+	 * if (!file.exists()) { file.createNewFile();
+	 * System.out.println("Created file: " + file); }
+	 */
+	// byte[] buffer = new byte[256];
+	// int read = 0;
+	/*
+	 * FileOutputStream fileOutputStream = new FileOutputStream(file);
+	 * BufferedWriter writer = Files.newBufferedWriter(targetPath,
+	 * Charset.forName("UTF-8"));
+	 * 
+	 * long size = in.readLong(); for (int i = 0; i < (size + 255) / 256; i++) {
+	 * read = in.read(buffer);
+	 * 
+	 * }
+	 * 
+	 * OutputStream os = new FileOutputStream(sourcePath.toFile());
+	 * Files.copy(targetPath, os); // Files.write(targetPath, sourcePath);
+	 * fileOutputStream.flush(); fileOutputStream.close();
+	 */
+	// System.out.println("downloadFile FINISHED");
 
-		//gui.informUser("DONE" /* filename + " succesfully downloaded to client's" */);
-		
-		
+	// gui.informUser("DONE" /* filename + " succesfully downloaded to client's"
+	// */);
 
 	protected String showListOfFiles() {
 
