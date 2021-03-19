@@ -13,6 +13,8 @@ import java.net.Socket;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +30,7 @@ public class ClientHandler implements Runnable {
 	private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
+	private long position;
 
 	public ClientHandler(Socket socket) {
 		this.socket = socket;
@@ -133,17 +136,26 @@ public class ClientHandler implements Runnable {
 
 	private void performDownload() throws IOException {
 		System.out.println("performDownload() BEGIN");
-		
-		
-		File fileFromStream = new File(in.readUTF());
-		//File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
-		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream);
+		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+		System.out.println(sourceFile);
+		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
-		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress(1235));
-        SocketChannel socketChannel = serverSocketChannel.accept();
-        FileChannel fileChannel = FileChannel.open(sourcePath, StandardOpenOption.READ);
-		fileChannel.transferTo(Long.MAX_VALUE, 0, socketChannel);
+		FileSystem fileSystem = FileSystems.getDefault();
+		System.out.println(fileSystem);
+		FileChannel outputChannel = FileChannel.open(sourcePath, StandardOpenOption.READ);
+		int port = 1235;
+		InetSocketAddress hostAddress = new InetSocketAddress(port);
+		SocketChannel destinationChannel = SocketChannel.open(hostAddress);
+		System.out.println("ounputChannel: " + outputChannel);
+		long sizeOfsourceFile = sourceFile.length();
+		long position = 0;
+		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + 
+				" bytes from " + outputChannel + " to " + destinationChannel);
+		while (position < sizeOfsourceFile) {
+			outputChannel.transferTo(position, sizeOfsourceFile, destinationChannel);
+			position++;
+		}
+			
 		System.out.println("performDownload() FINISHED");
 		//}
 	}

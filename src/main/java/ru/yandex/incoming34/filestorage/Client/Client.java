@@ -104,40 +104,17 @@ public class Client implements Runnable {
 		System.out.println("downloadFile BEGIN");
 		try {
 			out.writeUTF("download");
+			out.writeUTF(filename);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
-		try (SocketChannel socketChannel = SocketChannel.open(serverAddress)) {
-			File file = new File("/media/sergei/Linux/ClientFiles" + File.separator + filename);
-			RandomAccessFile targetFile = new RandomAccessFile(file, "rw");
-
-			FileChannel channel = (FileChannel.open(
-					Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename),
-					StandardOpenOption.CREATE_NEW, StandardOpenOption.READ));
-			ByteBuffer buffer = ByteBuffer.allocate(256);
-			FileWriter fileWriter = new FileWriter(file);
-			int bytesRead = 0;
+		
+		
 			
-			while (bytesRead != -1) {
-				bytesRead = channel.read(buffer);
-				System.out.print('.');
-				buffer.flip();
-				while (buffer.hasRemaining()) {
-					socketChannel.write(buffer);
-				}
-
-				// buffer.get;
-				buffer.clear();
-			}
-
-			// targetFile.close();
-		}
-		// position += channel.transferFrom(channel, position, size);
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		
 		}
 
 		// fileWriter.transfer(channel, size);
