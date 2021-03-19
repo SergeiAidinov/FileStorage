@@ -109,13 +109,13 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
+		//InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
 		
 		
 			
 		
 		
-		}
+		
 
 		// fileWriter.transfer(channel, size);
 
@@ -143,9 +143,9 @@ public class Client implements Runnable {
 		 * Files.copy(targetPath, os); // Files.write(targetPath, sourcePath);
 		 * fileOutputStream.flush(); fileOutputStream.close();
 		 */
-		System.out.println("downloadFile FINISHED");
+		//System.out.println("downloadFile FINISHED");
 
-		gui.informUser("DONE" /* filename + " succesfully downloaded to client's" */);
+		//gui.informUser("DONE" /* filename + " succesfully downloaded to client's" */);
 		return "Downloaded file " + filename;
 	}
 
