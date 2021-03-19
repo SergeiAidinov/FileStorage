@@ -1,24 +1,14 @@
 package ru.yandex.incoming34.filestorage.Client;
 
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -109,7 +99,29 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		//InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
+		
+		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.pathSeparator + filename);
+		File targetFile = new File (targetPath.toString());
+		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
+		try {
+			FileChannel inputFileChannel = FileChannel.open(targetPath, StandardOpenOption.CREATE_NEW,
+					StandardOpenOption.WRITE);
+			SocketChannel sourceChannel = SocketChannel.open(serverAddress);
+			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
+			long position = 0;
+			/*
+			do {
+				
+				inputFileChannel.transferFrom(sourceChannel, position, 1_000_000_000);
+				System.out.println("position: " + position);
+				position++;
+			} while (true);
+			*/
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 		
 			

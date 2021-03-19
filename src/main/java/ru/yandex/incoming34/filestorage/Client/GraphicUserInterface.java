@@ -10,6 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
+import ru.yandex.incoming34.filestorage.Client.Client;
+
 public class GraphicUserInterface {
 
 	JFrame frame = new JFrame("Cloud Storage");
