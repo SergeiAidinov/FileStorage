@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -146,27 +147,25 @@ public class ClientHandler implements Runnable {
 		System.out.println("sourcePath: " + sourcePath);
 		FileSystem fileSystem = FileSystems.getDefault();
 		System.out.println(fileSystem);
-		FileChannel outputChannel = FileChannel.open(sourcePath, StandardOpenOption.READ);
+		FileChannel outputChannel = FileChannel.open(sourcePath);
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1235;
 		InetSocketAddress hostAddress = new InetSocketAddress(port);
 		SocketChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
-		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes from "
+		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
+		int lastByte = -1;
 		while ((outputChannel.read(buffer)) != -1) {
+			// System.out.println("Raed from outputChannel: " + lastByte);
+			// outputChannel.read(buffer);
 			buffer.flip();
-			//destinationChannel.write(buffer);
-			System.out.println("In byffer: " + buffer.limit()); 
-			//buffer.flip();
-			while (buffer.hasRemaining()) {
-				byte b = buffer.get();
-				System.out.print((char)b);
-			}
-			//buffer.clear();
+			destinationChannel.write(buffer);
+			buffer.clear();
 		}
+		System.out.println("In byffer: " + buffer.capacity());
 
 		System.out.println("performDownload() FINISHED");
 	}
