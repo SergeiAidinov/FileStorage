@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.UTFDataFormatException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -141,7 +142,8 @@ public class ClientHandler implements Runnable {
 
 	private void performDownload() throws IOException {
 		System.out.println("performDownload() BEGIN");
-		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+		File sourceFile = 
+				new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
 		System.out.println(sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
@@ -157,16 +159,17 @@ public class ClientHandler implements Runnable {
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
-		int lastByte = -1;
-		while ((outputChannel.read(buffer)) != -1) {
-			// System.out.println("Raed from outputChannel: " + lastByte);
-			// outputChannel.read(buffer);
+		int lastByte = outputChannel.read(buffer);
+		while (lastByte != -1) {
 			buffer.flip();
+			while (buffer.hasRemaining()) {
+				System.out.print((char)buffer.get());
+			}
 			destinationChannel.write(buffer);
+			System.out.println("In byffer: " + buffer.limit());
 			buffer.clear();
+			lastByte = outputChannel.read(buffer);
 		}
-		System.out.println("In byffer: " + buffer.capacity());
-
 		System.out.println("performDownload() FINISHED");
 	}
 

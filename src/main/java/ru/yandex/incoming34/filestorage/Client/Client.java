@@ -93,17 +93,15 @@ public class Client implements Runnable {
 	protected String downloadFile(String filename) {
 		System.out.println("downloadFile BEGIN");
 		try {
-			out.writeUTF("download");
-			out.writeUTF(filename);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
+		out.writeUTF("download");
+		out.writeUTF(filename);
 		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.pathSeparator + filename);
 		File targetFile = new File (targetPath.toString());
+		if (targetFile.exists()) {
+			targetFile.createNewFile();
+		}
 		InetSocketAddress serverAddress = new InetSocketAddress("localhost", 1235);
-		try {
+		
 			FileChannel inputFileChannel = FileChannel.open(targetPath, StandardOpenOption.CREATE_NEW,
 					StandardOpenOption.WRITE);
 			SocketChannel sourceChannel = SocketChannel.open(serverAddress);
@@ -121,7 +119,8 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		return filename;
+		}
 		
 		
 			
@@ -158,8 +157,8 @@ public class Client implements Runnable {
 		//System.out.println("downloadFile FINISHED");
 
 		//gui.informUser("DONE" /* filename + " succesfully downloaded to client's" */);
-		return "Downloaded file " + filename;
-	}
+		
+		
 
 	protected String showListOfFiles() {
 
