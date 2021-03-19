@@ -22,6 +22,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -143,8 +144,7 @@ public class ClientHandler implements Runnable {
 
 	private void performDownload() throws IOException {
 		System.out.println("performDownload() BEGIN");
-		File sourceFile = 
-				new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
 		System.out.println(sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
@@ -153,7 +153,7 @@ public class ClientHandler implements Runnable {
 		FileChannel outputChannel = FileChannel.open(sourcePath);
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1237;
-		//InetSocketAddress hostAddress = new InetSocketAddress(port);
+		// InetSocketAddress hostAddress = new InetSocketAddress(port);
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
 		SocketChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
@@ -162,16 +162,14 @@ public class ClientHandler implements Runnable {
 				+ outputChannel + " to " + destinationChannel);
 
 		int lastByte = outputChannel.read(buffer);
+		buffer.flip();
+		
 		while (lastByte != -1) {
-			buffer.flip();
-			while (buffer.hasRemaining()) {
-				System.out.print((char)buffer.get());
-			}
 			destinationChannel.write(buffer);
-			System.out.println("In byffer: " + buffer.limit());
 			buffer.clear();
 			lastByte = outputChannel.read(buffer);
 		}
+		
 		outputChannel.close();
 		System.out.println("performDownload() FINISHED");
 	}

@@ -106,46 +106,54 @@ public class Client implements Runnable {
 			if (!targetFile.exists()) {
 				targetFile.createNewFile();
 			}
-			// ServerSocketChannel serverAddress = new InetSocketAddress(1235);
-			// SocketChannel sourceChannel = SocketChannel.open(serverAddress);
-			// SocketChannel sourceChanel =
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
 			SocketChannel sourceChannel = serverSocketChannel.accept();
 			System.out.println("sourceChannel: " + sourceChannel);
-			// FileChannel targetFileChannel = (FileChannel)
-			// Files.newByteChannel(targetPath, StandardOpenOption.WRITE,
-			// StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
 			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
+			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() +
+					" " + sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			System.out.println("buffer: " + buffer);
 			int lastByte = sourceChannel.read(buffer);
 			System.out.println("lastByte" + lastByte);
-			while (lastByte != -1) {
+			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE);
+			fileWriter.write("Line!!!");
+			//writer.append("Line!!!");
+			int iter = 0;
+			label: while (lastByte != -1) {
 				buffer.flip();
+				
 				while (buffer.hasRemaining()) {
+					iter++;
 					System.out.print((char) buffer.get());
+					if (iter > 16) break label;
 				}
-
+				buffer.clear();
+				
+				lastByte = sourceChannel.read(buffer);
+				/*
 				targetFileChannel.write(buffer);
 				System.out.println("In byffer: " + buffer.limit());
 				buffer.clear(); // 
-				lastByte = targetFileChannel.read(buffer); // 
+				//lastByte = targetFileChannel.read(buffer); // 
 				while (buffer.hasRemaining()) {
 				buffer.rewind();
 				targetFileChannel.write(buffer);
 				buffer.clear();
-
 			}
+			*/	
+				
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("downloadFile END");
+		
 		return filename;
 	}
 
