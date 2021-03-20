@@ -125,28 +125,32 @@ public class Client implements Runnable {
 			int iter = 0;
 			int lastByte = sourceChannel.write(buffer);
 			System.out.println("lastByte" + lastByte);
-			
+
 			buffer.flip();
-			while (lastByte != -1) 
-			//for (int i = 0; i < lastByte; i++)
+			while (lastByte != -1)
+			// for (int i = 0; i < lastByte; i++)
 			{
+
 				receivedBytes += buffer.limit();
 				int currentLimit = buffer.limit();
 				iter = 0;
 				buffer.flip();
-				//for (int i = 0; i < currentLimit; i++)
-				while (buffer.hasRemaining())
-				{
-				System.out.print((char) buffer.get(iter));
-				
-				//buffer.clear();
-				iter++;
+				for (int i = 0; i < currentLimit; i++)
+				//while (buffer.hasRemaining()) 
+					{
+					System.out.print((char) buffer.get(iter));
+
+					// buffer.clear();
+					iter++;
+					if (iter == buffer.limit()) break;
 				}
 				buffer.clear();
 				System.out.println("Buffer read");
+
 				lastByte = sourceChannel.write(buffer);
-				/*if (iter == lastByte)
-					break; */
+				/*
+				 * if (iter == lastByte) break;
+				 */
 			}
 			/*
 			 * buffer.clear();
