@@ -97,12 +97,14 @@ public class Client implements Runnable {
 
 	protected String downloadFile(String filename) {
 		System.out.println("downloadFile BEGIN");
+		long receivedBytes = 0;
 		try {
 			out.writeUTF("download");
 			out.writeUTF(filename);
 			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			System.out.println("targetPath: " + targetPath);
 			File targetFile = new File(targetPath.toString());
+			targetFile.setWritable(true);
 			if (!targetFile.exists()) {
 				targetFile.createNewFile();
 			}
@@ -113,47 +115,58 @@ public class Client implements Runnable {
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
 			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
-			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() +
-					" " + sourceChannel.getRemoteAddress());
+			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
+					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			System.out.println("buffer: " + buffer);
-			int lastByte = sourceChannel.read(buffer);
-			System.out.println("lastByte" + lastByte);
 			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE);
 			fileWriter.write("Line!!!");
-			//writer.append("Line!!!");
 			int iter = 0;
-			label: while (lastByte != -1) {
+			int lastByte = sourceChannel.write(buffer);
+			System.out.println("lastByte" + lastByte);
+			
+			buffer.flip();
+			while (lastByte != -1) 
+			//for (int i = 0; i < lastByte; i++)
+			{
+				receivedBytes += buffer.limit();
+				int currentLimit = buffer.limit();
+				iter = 0;
 				buffer.flip();
+				//for (int i = 0; i < currentLimit; i++)
+				while (buffer.hasRemaining())
+				{
+				System.out.print((char) buffer.get(iter));
 				
-				while (buffer.hasRemaining()) {
-					iter++;
-					System.out.print((char) buffer.get());
-					if (iter > 16) break label;
+				//buffer.clear();
+				iter++;
 				}
 				buffer.clear();
-				
-				lastByte = sourceChannel.read(buffer);
-				/*
-				targetFileChannel.write(buffer);
-				System.out.println("In byffer: " + buffer.limit());
-				buffer.clear(); // 
-				//lastByte = targetFileChannel.read(buffer); // 
-				while (buffer.hasRemaining()) {
-				buffer.rewind();
-				targetFileChannel.write(buffer);
-				buffer.clear();
+				System.out.println("Buffer read");
+				lastByte = sourceChannel.write(buffer);
+				/*if (iter == lastByte)
+					break; */
 			}
-			*/	
-				
-			}
+			/*
+			 * buffer.clear();
+			 * 
+			 * lastByte = sourceChannel.read(buffer);
+			 * 
+			 * targetFileChannel.write(buffer); System.out.println("In byffer: " +
+			 * buffer.limit()); buffer.clear(); // //lastByte =
+			 * targetFileChannel.read(buffer); // while (buffer.hasRemaining()) {
+			 * buffer.rewind(); targetFileChannel.write(buffer); buffer.clear(); }
+			 */
+
+			serverSocketChannel.close();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("downloadFile END");
-		
+		System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
+
 		return filename;
 	}
 

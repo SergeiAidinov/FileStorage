@@ -163,15 +163,17 @@ public class ClientHandler implements Runnable {
 
 		int lastByte = outputChannel.read(buffer);
 		buffer.flip();
-		
+		long transmittedBytes = 0;
 		while (lastByte != -1) {
+			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
 			buffer.clear();
 			lastByte = outputChannel.read(buffer);
 		}
 		
 		outputChannel.close();
-		System.out.println("performDownload() FINISHED");
+		destinationChannel.close();
+		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 
 	private void showListOfFiles() {
