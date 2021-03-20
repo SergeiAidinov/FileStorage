@@ -123,35 +123,34 @@ public class Client implements Runnable {
 			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE);
 			fileWriter.write("Line!!!");
 			int iter = 0;
-			int lastByte = sourceChannel.write(buffer);
-			System.out.println("lastByte" + lastByte);
+			int lastByte =0; // = sourceChannel.write(buffer);
 
-			buffer.flip();
-			while (lastByte != -1)
-			// for (int i = 0; i < lastByte; i++)
-			{
-
+			//buffer.flip();
+			while (lastByte  != -1) {
+				//buffer.flip();
 				receivedBytes += buffer.limit();
-				int currentLimit = buffer.limit();
-				iter = 0;
+				lastByte = sourceChannel.read(buffer);
+				//lastByte = sourceChannel.read(buffer);
+				//buffer.clear();
+				//if (lastByte == -1) break;
+				//buffer.rewind();
+				//buffer.clear();
+				System.out.println("lastByte: " + lastByte);
 				buffer.flip();
-				for (int i = 0; i < currentLimit; i++)
-				//while (buffer.hasRemaining()) 
-					{
-					System.out.print((char) buffer.get(iter));
-
-					// buffer.clear();
-					iter++;
-					if (iter == buffer.limit()) break;
-				}
-				buffer.clear();
-				System.out.println("Buffer read");
-
-				lastByte = sourceChannel.write(buffer);
-				/*
-				 * if (iter == lastByte) break;
-				 */
+				targetFileChannel.write(buffer);
+				
+				
+				/*while (buffer.hasRemaining()) {
+					System.out.print(buffer.getChar());
+				} */
+				
+				
 			}
+			
+
+				
+			//} 
+		//while (count != -1);
 			/*
 			 * buffer.clear();
 			 * 
@@ -164,7 +163,7 @@ public class Client implements Runnable {
 			 */
 
 			serverSocketChannel.close();
-
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -172,6 +171,7 @@ public class Client implements Runnable {
 		System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 
 		return filename;
+		
 	}
 
 	// fileWriter.transfer(channel, size);
