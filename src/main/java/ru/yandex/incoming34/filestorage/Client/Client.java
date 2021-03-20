@@ -126,23 +126,16 @@ public class Client implements Runnable {
 			int lastByte =0; // = sourceChannel.write(buffer);
 
 			//buffer.flip();
+			lastByte = sourceChannel.read(buffer);
 			while (lastByte  != -1) {
-				//buffer.flip();
+				
 				receivedBytes += buffer.limit();
-				lastByte = sourceChannel.read(buffer);
-				//lastByte = sourceChannel.read(buffer);
-				//buffer.clear();
-				//if (lastByte == -1) break;
-				//buffer.rewind();
-				//buffer.clear();
-				System.out.println("lastByte: " + lastByte);
 				buffer.flip();
-				targetFileChannel.write(buffer);
-				
-				
-				/*while (buffer.hasRemaining()) {
-					System.out.print(buffer.getChar());
-				} */
+			      while(buffer.hasRemaining()){
+			          System.out.print((char) buffer.get());
+			      }
+			      buffer.clear();
+			      lastByte = sourceChannel.read(buffer);
 				
 				
 			}
