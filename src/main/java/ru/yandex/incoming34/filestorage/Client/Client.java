@@ -26,6 +26,7 @@ public class Client implements Runnable {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
+	private int iter;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
@@ -112,7 +113,8 @@ public class Client implements Runnable {
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
 			SocketChannel sourceChannel = serverSocketChannel.accept();
 			System.out.println("sourceChannel: " + sourceChannel);
-			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
+					StandardOpenOption.APPEND);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
 			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
 			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
@@ -120,83 +122,37 @@ public class Client implements Runnable {
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			System.out.println("buffer: " + buffer);
-			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE);
+			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE,
+					StandardOpenOption.APPEND);
 			fileWriter.write("Line!!!");
-			int iter = 0;
-			int lastByte =0; // = sourceChannel.write(buffer);
 
-			//buffer.flip();
-			lastByte = sourceChannel.read(buffer);
-			while (lastByte  != -1) {
-				
+			int lastByte = 0;
+			while ((lastByte != -1)) {
+				iter++;
+				System.out.println("buffer in WHILE 1: " + buffer);
 				receivedBytes += buffer.limit();
 				buffer.flip();
-			      while(buffer.hasRemaining()){
-			          System.out.print((char) buffer.get());
-			      }
-			      buffer.clear();
-			      lastByte = sourceChannel.read(buffer);
-				
-				
-			}
-			
+				targetFileChannel.write(buffer);
+				buffer.clear();
+				System.out.println("buffer in WHILE 2 : " + buffer);
+				System.out.println("buffer in WHILE AFTER CLEAR: " + buffer);
+				System.out.println(lastByte = sourceChannel.read(buffer));
+				System.out.println("buffer in WHILE 3: " + buffer);
 
-				
-			//} 
-		//while (count != -1);
-			/*
-			 * buffer.clear();
-			 * 
-			 * lastByte = sourceChannel.read(buffer);
-			 * 
-			 * targetFileChannel.write(buffer); System.out.println("In byffer: " +
-			 * buffer.limit()); buffer.clear(); // //lastByte =
-			 * targetFileChannel.read(buffer); // while (buffer.hasRemaining()) {
-			 * buffer.rewind(); targetFileChannel.write(buffer); buffer.clear(); }
-			 */
+			}
 
 			serverSocketChannel.close();
-			
+			targetFileChannel.close();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
+		System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
 
 		return filename;
-		
+
 	}
-
-	// fileWriter.transfer(channel, size);
-
-	// fileWriter.transfer(channel, size);
-
-	// fileWriter.transfer(channel, size);
-	// fileWriter.close();
-	/*
-	 * if (!file.exists()) { file.createNewFile();
-	 * System.out.println("Created file: " + file); }
-	 */
-	// byte[] buffer = new byte[256];
-	// int read = 0;
-	/*
-	 * FileOutputStream fileOutputStream = new FileOutputStream(file);
-	 * BufferedWriter writer = Files.newBufferedWriter(targetPath,
-	 * Charset.forName("UTF-8"));
-	 * 
-	 * long size = in.readLong(); for (int i = 0; i < (size + 255) / 256; i++) {
-	 * read = in.read(buffer);
-	 * 
-	 * }
-	 * 
-	 * OutputStream os = new FileOutputStream(sourcePath.toFile());
-	 * Files.copy(targetPath, os); // Files.write(targetPath, sourcePath);
-	 * fileOutputStream.flush(); fileOutputStream.close();
-	 */
-	// System.out.println("downloadFile FINISHED");
-
-	// gui.informUser("DONE" /* filename + " succesfully downloaded to client's"
-	// */);
 
 	protected String showListOfFiles() {
 
