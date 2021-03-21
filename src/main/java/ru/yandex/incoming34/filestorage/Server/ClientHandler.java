@@ -153,7 +153,6 @@ public class ClientHandler implements Runnable {
 		FileChannel outputChannel = FileChannel.open(sourcePath);
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1237;
-		// InetSocketAddress hostAddress = new InetSocketAddress(port);
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
 		SocketChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
@@ -164,6 +163,7 @@ public class ClientHandler implements Runnable {
 		int lastByte = outputChannel.read(buffer);
 		buffer.flip();
 		long transmittedBytes = 0;
+
 		while (lastByte != -1) {
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
