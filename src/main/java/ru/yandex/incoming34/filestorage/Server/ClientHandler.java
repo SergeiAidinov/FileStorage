@@ -154,7 +154,8 @@ public class ClientHandler implements Runnable {
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1237;
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
-		SocketChannel destinationChannel = SocketChannel.open(hostAddress);
+		//SocketChannel destinationChannel = SocketChannel.open(hostAddress);
+		WritableByteChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
@@ -163,7 +164,7 @@ public class ClientHandler implements Runnable {
 		int lastByte = outputChannel.read(buffer);
 		buffer.flip();
 		long transmittedBytes = 0;
-		long qtyBuffers = calculateQuantutyOfBuffers(sourceFile, buffer);
+		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
 				
 		out.writeLong(qtyBuffers);
 		System.out.println(qtyBuffers);
@@ -172,13 +173,14 @@ public class ClientHandler implements Runnable {
 			destinationChannel.write(buffer);
 			buffer.clear();
 			lastByte = outputChannel.read(buffer);
+			//System.out.println(in.readUTF());
 		}
 		outputChannel.close();
 		destinationChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 
-	private long calculateQuantutyOfBuffers(File oneFile, ByteBuffer oneBuffer) {
+	private long calculateQuantityOfBuffers(File oneFile, ByteBuffer oneBuffer) {
 		long qtyBuffers = oneFile.length() / oneBuffer.capacity();
 		if (qtyBuffers * oneBuffer.capacity() < oneFile.length()) {
 			qtyBuffers++;

@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.ReadOnlyBufferException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +29,7 @@ public class Client implements Runnable {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
-	private int iter;
+	//private int iter;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
@@ -97,6 +100,7 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
+		int iter = 0;
 		System.out.println("downloadFile BEGIN");
 		long receivedBytes = 0;
 		try {
@@ -111,6 +115,9 @@ public class Client implements Runnable {
 			}
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
+			
+			
+			
 			SocketChannel sourceChannel = serverSocketChannel.accept();
 			
 			System.out.println("sourceChannel: " + sourceChannel);
@@ -122,7 +129,7 @@ public class Client implements Runnable {
 					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			System.out.println("buffer: " + buffer);
+			//System.out.println("buffer: " + buffer);
 			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			fileWriter.write("Line!!!");
@@ -132,27 +139,25 @@ public class Client implements Runnable {
 			//System.out.println(in.readLong());
 			//while ((lastByte = sourceChannel.read(buffer)) != -1) {
 			long qtyBuffers = in.readLong();
-			for (long i = 0; i < qtyBuffers+1; i++) {
-				
-				iter++;
-				//System.out.println("buffer in WHILE 1: " + buffer);
-				//receivedBytes += buffer.limit();
+			for (long i = 0; i < qtyBuffers; i++) {
 				sourceChannel.read(buffer);
+				iter++;
+				receivedBytes += buffer.limit();
+				//sourceChannel.read(buffer);
 				buffer.flip();
-				//targetFileChannel.write(buffer);
-				//for (int i = 0; i < buffer.limit(); i++) {
-				while (buffer.hasRemaining()) {
-					System.out.print((char)buffer.get());
-					receivedBytes++;
-					//System.out.print(buffer.get(i));
-				}
+				//while (!buffer.hasRemaining()) {
+				for (int j = 0; j < buffer.limit(); j++) {
+					//System.out.print((char)buffer.get(j));
+					//targetFileChannel.write(buffer, 256 * i);
+				} 
+				//byte[] byteBuffer = buffer.array();
+				//targetFileChannel.write(byteBuffer, 0, buffer.limit());
+				
+					//targetFileChannel.write(buffer);
+				System.out.println();
+				//out.writeUTF("SNB");
 				buffer.clear();
-				/*
-				System.out.println("buffer in WHILE 2 : " + buffer);
-				System.out.println("buffer in WHILE AFTER CLEAR: " + buffer);
-				System.out.println(lastByte = sourceChannel.read(buffer));
-				System.out.println("buffer in WHILE 3: " + buffer);
-				*/
+				
 
 			}
 
@@ -163,6 +168,7 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println();
 		System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
 
 		return filename;
