@@ -112,6 +112,7 @@ public class Client implements Runnable {
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
 			SocketChannel sourceChannel = serverSocketChannel.accept();
+			
 			System.out.println("sourceChannel: " + sourceChannel);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
@@ -127,17 +128,31 @@ public class Client implements Runnable {
 			fileWriter.write("Line!!!");
 
 			int lastByte = 0;
-			while ((lastByte != -1)) {
+			//sourceChannel.read(buffer);
+			//System.out.println(in.readLong());
+			//while ((lastByte = sourceChannel.read(buffer)) != -1) {
+			long qtyBuffers = in.readLong();
+			for (long i = 0; i < qtyBuffers+1; i++) {
+				
 				iter++;
-				System.out.println("buffer in WHILE 1: " + buffer);
-				receivedBytes += buffer.limit();
+				//System.out.println("buffer in WHILE 1: " + buffer);
+				//receivedBytes += buffer.limit();
+				sourceChannel.read(buffer);
 				buffer.flip();
-				targetFileChannel.write(buffer);
+				//targetFileChannel.write(buffer);
+				//for (int i = 0; i < buffer.limit(); i++) {
+				while (buffer.hasRemaining()) {
+					System.out.print((char)buffer.get());
+					receivedBytes++;
+					//System.out.print(buffer.get(i));
+				}
 				buffer.clear();
+				/*
 				System.out.println("buffer in WHILE 2 : " + buffer);
 				System.out.println("buffer in WHILE AFTER CLEAR: " + buffer);
 				System.out.println(lastByte = sourceChannel.read(buffer));
 				System.out.println("buffer in WHILE 3: " + buffer);
+				*/
 
 			}
 

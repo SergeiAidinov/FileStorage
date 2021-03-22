@@ -163,7 +163,10 @@ public class ClientHandler implements Runnable {
 		int lastByte = outputChannel.read(buffer);
 		buffer.flip();
 		long transmittedBytes = 0;
-
+		long qtyBuffers = calculateQuantutyOfBuffers(sourceFile, buffer);
+				
+		out.writeLong(qtyBuffers);
+		System.out.println(qtyBuffers);
 		while (lastByte != -1) {
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
@@ -173,6 +176,14 @@ public class ClientHandler implements Runnable {
 		outputChannel.close();
 		destinationChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
+	}
+
+	private long calculateQuantutyOfBuffers(File oneFile, ByteBuffer oneBuffer) {
+		long qtyBuffers = oneFile.length() / oneBuffer.capacity();
+		if (qtyBuffers * oneBuffer.capacity() < oneFile.length()) {
+			qtyBuffers++;
+		}
+		return qtyBuffers;
 	}
 
 	private void showListOfFiles() {
