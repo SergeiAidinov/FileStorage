@@ -140,23 +140,36 @@ public class Client implements Runnable {
 			//while ((lastByte = sourceChannel.read(buffer)) != -1) {
 			long qtyBuffers = in.readLong();
 			for (long i = 0; i < qtyBuffers; i++) {
+				//buffer.rewind();
+				//buffer.flip();
 				sourceChannel.read(buffer);
 				iter++;
 				receivedBytes += buffer.limit();
 				//sourceChannel.read(buffer);
-				buffer.flip();
+				//buffer.flip();
+				//buffer.limit(buffer.position()).position(0);
 				//while (!buffer.hasRemaining()) {
 				for (int j = 0; j < buffer.limit(); j++) {
-					//System.out.print((char)buffer.get(j));
+					System.out.print((char)buffer.get(j));
+					//targetFileChannel.write(buffer);
 					//targetFileChannel.write(buffer, 256 * i);
-				} 
+					
+				}
+				System.out.println();
+				buffer.flip();
+				targetFileChannel.write(buffer);
+				buffer.clear();
 				//byte[] byteBuffer = buffer.array();
 				//targetFileChannel.write(byteBuffer, 0, buffer.limit());
-				
-					//targetFileChannel.write(buffer);
-				System.out.println();
+				//while (buffer.hasRemaining()) {
+					
+					
+					
+				//}
+					
+				//System.out.println();
 				//out.writeUTF("SNB");
-				buffer.clear();
+				//buffer.clear();
 				
 
 			}

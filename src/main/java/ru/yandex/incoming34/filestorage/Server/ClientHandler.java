@@ -169,11 +169,14 @@ public class ClientHandler implements Runnable {
 		out.writeLong(qtyBuffers);
 		System.out.println(qtyBuffers);
 		while (lastByte != -1) {
+			
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
-			buffer.clear();
+			buffer.flip();
 			lastByte = outputChannel.read(buffer);
+			//buffer.rewind();
 			//System.out.println(in.readUTF());
+			buffer.clear();
 		}
 		outputChannel.close();
 		destinationChannel.close();
