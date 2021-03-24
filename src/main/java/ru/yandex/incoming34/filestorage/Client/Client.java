@@ -1,6 +1,5 @@
 package ru.yandex.incoming34.filestorage.Client;
 
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -9,14 +8,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -25,6 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
+
 
 public class Client implements Runnable {
 	private final Socket socket;
@@ -141,7 +138,7 @@ public class Client implements Runnable {
 
 			int lastByte = 0;
 			long qtyBuffers = in.readLong();
-			for (long i = 0; i < qtyBuffers; i++) {
+			for (long i = 0; i < qtyBuffers+1; i++) {
 				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;

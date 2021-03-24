@@ -161,7 +161,7 @@ public class ClientHandler implements Runnable {
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
-		int lastByte; //outputChannel.read(buffer);
+		int lastByte; 
 		buffer.flip();
 		long transmittedBytes = 0;
 		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
