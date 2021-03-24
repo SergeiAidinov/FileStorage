@@ -29,7 +29,7 @@ public class Client implements Runnable {
 	private final DataInputStream in;
 	private final DataOutputStream out;
 	private final GraphicUserInterface gui;
-	//private int iter;
+	// private int iter;
 
 	public Client() throws IOException {
 		gui = new GraphicUserInterface(this);
@@ -115,11 +115,9 @@ public class Client implements Runnable {
 			}
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
-			
-			
-			
+
 			SocketChannel sourceChannel = serverSocketChannel.accept();
-			
+
 			System.out.println("sourceChannel: " + sourceChannel);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
@@ -129,49 +127,20 @@ public class Client implements Runnable {
 					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			//System.out.println("buffer: " + buffer);
 			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			fileWriter.write("Line!!!");
 
 			int lastByte = 0;
-			//sourceChannel.read(buffer);
-			//System.out.println(in.readLong());
-			//while ((lastByte = sourceChannel.read(buffer)) != -1) {
 			long qtyBuffers = in.readLong();
 			for (long i = 0; i < qtyBuffers; i++) {
-				//buffer.rewind();
-				//buffer.flip();
 				sourceChannel.read(buffer);
 				iter++;
 				receivedBytes += buffer.limit();
-				//sourceChannel.read(buffer);
-				//buffer.flip();
-				//buffer.limit(buffer.position()).position(0);
-				//while (!buffer.hasRemaining()) {
-				for (int j = 0; j < buffer.limit(); j++) {
-					//System.out.print((char)buffer.get(j));
-					//targetFileChannel.write(buffer);
-					//targetFileChannel.write(buffer, 256 * i);
-					
-				}
 				System.out.println();
 				buffer.flip();
 				targetFileChannel.write(buffer);
 				buffer.clear();
-				//byte[] byteBuffer = buffer.array();
-				//targetFileChannel.write(byteBuffer, 0, buffer.limit());
-				//while (buffer.hasRemaining()) {
-					
-					
-					
-				//}
-					
-				//System.out.println();
-				//out.writeUTF("SNB");
-				//buffer.clear();
-				
-
 			}
 
 			serverSocketChannel.close();
