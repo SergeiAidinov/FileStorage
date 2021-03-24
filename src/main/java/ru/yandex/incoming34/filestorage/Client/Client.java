@@ -23,6 +23,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Client implements Runnable {
 	private final Socket socket;
@@ -100,8 +102,18 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
-		int iter = 0;
 		System.out.println("downloadFile BEGIN");
+		
+		filename.trim();
+		System.out.println((byte)filename.charAt(filename.length()-1));
+		Pattern pattern = Pattern.compile("\n");
+		Matcher matcher = pattern.matcher(filename);
+		filename = matcher.replaceAll("");
+		System.out.println((byte)filename.charAt(filename.length()-1));
+		
+		System.out.println("Fetching: " + filename);
+		int iter = 0;
+		
 		long receivedBytes = 0;
 		try {
 			out.writeUTF("download");
@@ -122,25 +134,20 @@ public class Client implements Runnable {
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
-			BufferedWriter writer = Files.newBufferedWriter(targetPath, Charset.forName("UTF-8"));
 			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
 					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			BufferedWriter fileWriter = Files.newBufferedWriter(targetPath, StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
-			fileWriter.write("Line!!!");
 
 			int lastByte = 0;
 			long qtyBuffers = in.readLong();
 			for (long i = 0; i < qtyBuffers; i++) {
+				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;
-				receivedBytes += buffer.limit();
-				System.out.println();
 				buffer.flip();
+				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
-				buffer.clear();
 			}
 
 			serverSocketChannel.close();

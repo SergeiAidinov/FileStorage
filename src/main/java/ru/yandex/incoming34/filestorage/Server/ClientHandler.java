@@ -161,21 +161,18 @@ public class ClientHandler implements Runnable {
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
-		int lastByte = outputChannel.read(buffer);
+		int lastByte; //outputChannel.read(buffer);
 		buffer.flip();
 		long transmittedBytes = 0;
 		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
 				
 		out.writeLong(qtyBuffers);
 		System.out.println(qtyBuffers);
-		while (lastByte != -1) {
-			
+		for (long i = 0; i < qtyBuffers +1; i++) {
+			lastByte = outputChannel.read(buffer);
+			buffer.flip();
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
-			buffer.flip();
-			lastByte = outputChannel.read(buffer);
-			//buffer.rewind();
-			//System.out.println(in.readUTF());
 			buffer.clear();
 		}
 		outputChannel.close();
