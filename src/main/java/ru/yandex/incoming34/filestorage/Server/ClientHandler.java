@@ -27,6 +27,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -166,6 +167,32 @@ public class ClientHandler implements Runnable {
 		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
 
 		out.writeLong(qtyBuffers);
+		/*
+		//============================
+		
+		String lengtOfFile = String.valueOf(qtyBuffers);
+		byte[] bufferLong = new byte[lengtOfFile.length()];
+		for (int i =0; i < lengtOfFile.length(); i++) {
+			//bufferLong[i] = (lengtOfFile.charAt(i));
+			bufferLong[i] = Byte.valueOf((byte) (lengtOfFile.charAt(i) - '0'));
+		}
+		
+		ByteBuffer byteBufferLong = ByteBuffer.allocate(bufferLong.length);
+		byteBufferLong.wrap(bufferLong, 0, bufferLong.length);
+		
+		//for (int i = 0; i < byteBufferLong.limit(); i++) {
+			destinationChannel.write(byteBufferLong);
+		//}
+		
+		System.out.println("bufferLong: " + Arrays.toString(bufferLong));
+		byteBufferLong.clear();
+		
+		//destinationChannel.write(byteBufferLong);
+		System.out.println("bufferLong: " + Arrays.toString(bufferLong));
+		
+		//=================================
+		*/
+		
 		System.out.println(qtyBuffers);
 		for (long i = 0; i < qtyBuffers + 1; i++) {
 			lastByte = outputChannel.read(buffer);
