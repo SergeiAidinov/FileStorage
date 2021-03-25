@@ -19,7 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import ru.yandex.incoming34.filestorage.Client.GraphicUserInterface;
 
 
 
@@ -100,17 +100,17 @@ public class Client implements Runnable {
 
 	protected String downloadFile(String filename) {
 		System.out.println("downloadFile BEGIN");
-		
+
 		filename.trim();
-		System.out.println((byte)filename.charAt(filename.length()-1));
+		System.out.println((byte) filename.charAt(filename.length() - 1));
 		Pattern pattern = Pattern.compile("\n");
 		Matcher matcher = pattern.matcher(filename);
 		filename = matcher.replaceAll("");
-		System.out.println((byte)filename.charAt(filename.length()-1));
-		
+		System.out.println((byte) filename.charAt(filename.length() - 1));
+
 		System.out.println("Fetching: " + filename);
 		int iter = 0;
-		
+
 		long receivedBytes = 0;
 		try {
 			out.writeUTF("download");
@@ -124,6 +124,7 @@ public class Client implements Runnable {
 			}
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
+			System.out.println();
 
 			SocketChannel sourceChannel = serverSocketChannel.accept();
 
@@ -138,7 +139,7 @@ public class Client implements Runnable {
 
 			int lastByte = 0;
 			long qtyBuffers = in.readLong();
-			for (long i = 0; i < qtyBuffers+1; i++) {
+			for (long i = 0; i < qtyBuffers + 1; i++) {
 				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;
@@ -154,7 +155,7 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println();
+		
 		System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
 
 		return filename;

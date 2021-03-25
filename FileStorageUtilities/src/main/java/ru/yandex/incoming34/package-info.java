@@ -1,1 +1,0 @@
-package ru.yandex.incoming34;

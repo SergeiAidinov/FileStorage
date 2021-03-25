@@ -154,21 +154,20 @@ public class ClientHandler implements Runnable {
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1237;
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
-		//SocketChannel destinationChannel = SocketChannel.open(hostAddress);
 		WritableByteChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
-		int lastByte; 
+		int lastByte;
 		buffer.flip();
 		long transmittedBytes = 0;
 		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
-				
+
 		out.writeLong(qtyBuffers);
 		System.out.println(qtyBuffers);
-		for (long i = 0; i < qtyBuffers +1; i++) {
+		for (long i = 0; i < qtyBuffers + 1; i++) {
 			lastByte = outputChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();

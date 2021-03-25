@@ -18,9 +18,9 @@ public class GraphicUserInterface {
 	Client myClient = null;
 	private JTextArea textArea;
 
-	public GraphicUserInterface(Client myClient) {
+	public GraphicUserInterface(Client client) {
 		super();
-		this.myClient = myClient;
+		this.myClient = client;
 		runGUI();
 	}
 
