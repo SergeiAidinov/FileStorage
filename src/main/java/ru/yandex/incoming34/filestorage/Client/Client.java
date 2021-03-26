@@ -128,40 +128,20 @@ public class Client implements Runnable {
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
 			System.out.println();
 
-			/*SocketChannel*/ ReadableByteChannel sourceChannel = serverSocketChannel.accept();
+			SocketChannel sourceChannel = serverSocketChannel.accept();
 
 			System.out.println("sourceChannel: " + sourceChannel);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
-			//System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
-					//+ sourceChannel.getRemoteAddress());
+			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
+					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			ByteBuffer lenBuffer = ByteBuffer.allocate(32);
 
 			int lastByte = 0;
 			long qtyBuffers = in.readLong();
-			
-			/*
-			//====================
-			//lenBuffer.flip();
-			System.out.println("sourceChannel.read(buffer): " + sourceChannel.read(lenBuffer));
-			lenBuffer.compact();
-			byte[] dst = new byte[lenBuffer.limit()];
-			dst = lenBuffer.array();
-			System.out.println(Arrays.toString(dst));
-			//lenBuffer.get(dst);
-			//System.out.println(Arrays.toString(dst));
-			
-			for (int i = 0; i < lenBuffer.limit(); i++) {
-				//System.out.println(i + ": " + (lenBuffer.get(i)));
-			}
-			
-			//==========================
-			*/
-			
-			for (long i = 0; i < qtyBuffers + 1; i++) {
+			for (long i = 0; i < qtyBuffers + 2; i++) {
 				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;
@@ -169,9 +149,16 @@ public class Client implements Runnable {
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 			}
-
+			/*
+			sourceChannel.read(buffer);
+			buffer.flip();
+			receivedBytes += buffer.limit();
+			targetFileChannel.write(buffer);
+			*/
+			
 			serverSocketChannel.close();
 			targetFileChannel.close();
+			
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -203,7 +190,6 @@ public class Client implements Runnable {
 		return "Received list of files on server.";
 	}
 
-	@Override
 	public void run() {
 
 	}

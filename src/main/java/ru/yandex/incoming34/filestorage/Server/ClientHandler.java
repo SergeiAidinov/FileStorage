@@ -155,7 +155,7 @@ public class ClientHandler implements Runnable {
 		System.out.println("outputChannel: " + outputChannel);
 		int port = 1237;
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
-		WritableByteChannel destinationChannel = SocketChannel.open(hostAddress);
+		ByteChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
@@ -167,40 +167,22 @@ public class ClientHandler implements Runnable {
 		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
 
 		out.writeLong(qtyBuffers);
-		/*
-		//============================
-		
-		String lengtOfFile = String.valueOf(qtyBuffers);
-		byte[] bufferLong = new byte[lengtOfFile.length()];
-		for (int i =0; i < lengtOfFile.length(); i++) {
-			//bufferLong[i] = (lengtOfFile.charAt(i));
-			bufferLong[i] = Byte.valueOf((byte) (lengtOfFile.charAt(i) - '0'));
-		}
-		
-		ByteBuffer byteBufferLong = ByteBuffer.allocate(bufferLong.length);
-		byteBufferLong.wrap(bufferLong, 0, bufferLong.length);
-		
-		//for (int i = 0; i < byteBufferLong.limit(); i++) {
-			destinationChannel.write(byteBufferLong);
-		//}
-		
-		System.out.println("bufferLong: " + Arrays.toString(bufferLong));
-		byteBufferLong.clear();
-		
-		//destinationChannel.write(byteBufferLong);
-		System.out.println("bufferLong: " + Arrays.toString(bufferLong));
-		
-		//=================================
-		*/
 		
 		System.out.println(qtyBuffers);
-		for (long i = 0; i < qtyBuffers + 1; i++) {
+		for (long i = 0; i < qtyBuffers + 2; i++) {
 			lastByte = outputChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
 			buffer.clear();
 		}
+		/*
+		ByteBuffer lastBuffer = ByteBuffer.allocate( (int) (sourceFile.length() - (256 * (qtyBuffers-1))));
+		outputChannel.read(lastBuffer);
+		transmittedBytes += lastBuffer.limit();
+		destinationChannel.write(lastBuffer);
+		System.out.println("outputChannel.size(): " + outputChannel.size());
+		*/
 		outputChannel.close();
 		destinationChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
