@@ -164,25 +164,15 @@ public class ClientHandler implements Runnable {
 		int lastByte;
 		buffer.flip();
 		long transmittedBytes = 0;
-		long qtyBuffers = calculateQuantityOfBuffers(sourceFile, buffer);
-
-		out.writeLong(qtyBuffers);
-		
-		System.out.println(qtyBuffers);
-		for (long i = 0; i < qtyBuffers + 2; i++) {
-			lastByte = outputChannel.read(buffer);
+		long bytesToTransmit = outputChannel.size();
+		out.writeLong(bytesToTransmit);
+		while (transmittedBytes < bytesToTransmit) {
+			outputChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			destinationChannel.write(buffer);
 			buffer.clear();
 		}
-		/*
-		ByteBuffer lastBuffer = ByteBuffer.allocate( (int) (sourceFile.length() - (256 * (qtyBuffers-1))));
-		outputChannel.read(lastBuffer);
-		transmittedBytes += lastBuffer.limit();
-		destinationChannel.write(lastBuffer);
-		System.out.println("outputChannel.size(): " + outputChannel.size());
-		*/
 		outputChannel.close();
 		destinationChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");

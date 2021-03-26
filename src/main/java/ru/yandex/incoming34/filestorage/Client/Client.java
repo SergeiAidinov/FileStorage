@@ -113,7 +113,7 @@ public class Client implements Runnable {
 		System.out.println("Fetching: " + filename);
 		int iter = 0;
 
-		long receivedBytes = 0;
+		
 		try {
 			out.writeUTF("download");
 			out.writeUTF(filename);
@@ -139,9 +139,9 @@ public class Client implements Runnable {
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 
-			int lastByte = 0;
-			long qtyBuffers = in.readLong();
-			for (long i = 0; i < qtyBuffers + 2; i++) {
+			long receivedBytes = 0;
+			long appreciatingBytes = in.readLong();
+			while (receivedBytes < appreciatingBytes) {
 				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;
@@ -149,23 +149,17 @@ public class Client implements Runnable {
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 			}
-			/*
-			sourceChannel.read(buffer);
-			buffer.flip();
-			receivedBytes += buffer.limit();
-			targetFileChannel.write(buffer);
-			*/
 			
 			serverSocketChannel.close();
 			targetFileChannel.close();
-			
+			System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
+		
 
 		return filename;
 
