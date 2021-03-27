@@ -3,6 +3,9 @@ package auxiliary;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,10 +58,30 @@ public class AuxiliaryMethods {
 		}
 		tempBuffer.flip();
 		byte[] tempByte = tempBuffer.array();
-		System.out.println("tempByte: " + Arrays.toString(tempByte));
 		long anotherLong = auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte);
 		return anotherLong;
 	}
+	
+	public static ByteBuffer convertStringToByteBuffer(String string) {
+		byte[] bytes = string.getBytes(Charset.forName("UTF-8"));
+		ByteBuffer tempBuffer = ByteBuffer.allocate(bytes.length);
+		tempBuffer.put(bytes);
+		tempBuffer.flip();
+		return tempBuffer;
 		
+	}
+	
+	public static String readStringFromChannel(ReadableByteChannel channel) {
+		ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
+		try {
+			channel.read(tempBuffer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String string = StandardCharsets.UTF_8.decode(tempBuffer).toString();
+		return string;
+		
+	}
 	
 }

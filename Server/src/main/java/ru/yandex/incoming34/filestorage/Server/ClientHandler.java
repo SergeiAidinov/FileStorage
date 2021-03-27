@@ -17,6 +17,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
@@ -36,16 +37,24 @@ import java.util.logging.Logger;
  * Обработчик входящих клиентов
  */
 public class ClientHandler implements Runnable {
-	private final Socket socket;
+	//private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
-	private long position;
+	private ByteChannel writeUtilityChannel;
+	private ByteChannel readUtilityChannel;
+	InetSocketAddress hostAddress;// 
+	int port = 1237;
+	
 
-	public ClientHandler(Socket socket) {
-		this.socket = socket;
+	public ClientHandler(ServerSocketChannel server) {
+		//this.socket = server;
+		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
 		try {
-			out = new DataOutputStream(socket.getOutputStream());
-			in = new DataInputStream(socket.getInputStream());
+			writeUtilityChannel = SocketChannel.open(hostAddress);
+			readUtilityChannel = SocketChannel.open(hostAddress);
+			//out = new DataOutputStream(server.getOutputStream());
+			//in = new DataInputStream(server.getInputStream());
+			System.out.println("ClientHandler created!");
 		} catch (IOException ex) {
 			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -58,11 +67,13 @@ public class ClientHandler implements Runnable {
 		try {
 			while (true) {
 
-				try {
-					command = in.readUTF();
-				} catch (EOFException eofEx) {
+				//try {
+					//command = in.readUTF();
+					command = auxiliary.AuxiliaryMethods.readStringFromChannel(readUtilityChannel);
+					System.out.println("command: " + command);
+				/*}  catch (EOFException eofEx) {
 					continue;
-				}
+				} */
 
 				switch (command) {
 				case "upload": {
@@ -153,8 +164,8 @@ public class ClientHandler implements Runnable {
 		System.out.println(fileSystem);
 		FileChannel outputChannel = FileChannel.open(sourcePath);
 		System.out.println("outputChannel: " + outputChannel);
-		int port = 1237;
-		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
+		
+		
 		ByteChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);

@@ -7,32 +7,52 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Client implements Runnable {
-	private final Socket socket;
-	private final DataInputStream in;
-	private final DataOutputStream out;
+	// private final SocketChannel socket;
+	// private final DataInputStream in;
+	// private final DataOutputStream out;
+	private ByteChannel writeUtilityChannel;
+	private ByteChannel readUtilityChannel;
+	InetSocketAddress hostAddress;
 	private final GraphicUserInterface gui;
-	// private int iter;
 
 	public Client() throws IOException {
+		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
 		gui = new GraphicUserInterface(this);
-		socket = new Socket("localhost", 1235);
-		in = new DataInputStream(socket.getInputStream());
-		out = new DataOutputStream(socket.getOutputStream());
+		// socket = new Socket("localhost", 1237);
+		SocketChannel client = SocketChannel.open();
+		client.connect(hostAddress);
+
+		/*
+		 * in = new DataInputStream(socket.getInputStream()); out = new
+		 * DataOutputStream(socket.getOutputStream()); SocketChannel sc =
+		 * SocketChannel.open(); InetSocketAddress addr = new
+		 * InetSocketAddress("localhost", port); sc.connect(addr);
+		 */
+		writeUtilityChannel = client.open();
+		
+		readUtilityChannel = client.open();
+		long lg = (long) (Math.random() * 10000000);
+		auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
 	}
 
 	private void runClient() {
@@ -51,18 +71,18 @@ public class Client implements Runnable {
 			File file = filename;
 			if (file.exists()) {
 				System.out.println("Transmitting file: " + filename.getName());
-				out.writeUTF("upload");
-				out.writeUTF(filename.toString());
+				// out.writeUTF("upload");
+				// out.writeUTF(filename.toString());
 				long length = file.length();
-				out.writeLong(length);
+				// out.writeLong(length);
 				fis = new FileInputStream(file);
 				int read = 0;
 				byte[] buffer = new byte[256];
 				while ((read = fis.read(buffer)) != -1) {
-					out.write(buffer, 0, read);
+					// out.write(buffer, 0, read);
 					System.out.print('.');
 				}
-				out.flush();
+				// out.flush();
 				String status = "String";
 				fis.close();
 				System.out.println("File transmitted.");
@@ -85,9 +105,11 @@ public class Client implements Runnable {
 	protected String deleteFile(String filename) {
 		String status = null;
 		try {
-			out.writeUTF("remove");
-			out.writeUTF(filename);
-			status = in.readUTF();
+			writeUtilityChannel.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("remove"));
+			writeUtilityChannel.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
+			// out.writeUTF("remove");
+			// out.writeUTF(filename);
+			// status = in.readUTF();
 			gui.informUser(status);
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -101,11 +123,9 @@ public class Client implements Runnable {
 		filename = auxiliary.AuxiliaryMethods.handleInputFromTextArea(filename);
 
 		System.out.println("Fetching: " + filename);
-		int iter = 0;
-
 		try {
-			out.writeUTF("download");
-			out.writeUTF(filename);
+			// out.writeUTF("download");
+			// out.writeUTF(filename);
 			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			System.out.println("targetPath: " + targetPath);
 			File targetFile = new File(targetPath.toString());
@@ -136,21 +156,19 @@ public class Client implements Runnable {
 			while ((receivedBytes != anotherLong)) {
 				buffer.clear();
 				sourceChannel.read(buffer);
-				iter++;
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 				if (receivedBytes >= anotherLong) {
 					break;
 				}
-				//System.out.println(iter);
 			}
 			sourceChannel.close();
 			serverSocketChannel.close();
 			targetFileChannel.close();
 			auxiliaryChannel.close();
 			buffer = null;
-			System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
+			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -162,21 +180,17 @@ public class Client implements Runnable {
 	}
 
 	protected String showListOfFiles() {
-
-		try {
-
-			try {
-				out.writeUTF("listOfFiles");
-			} catch (IOException ex) {
-				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			String filesList = in.readUTF();
-			gui.informUser(null);
-			gui.informUser(filesList);
-
-		} catch (IOException ex) {
-			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		/*
+		 * try {
+		 * 
+		 * try { //out.writeUTF("listOfFiles"); } catch (IOException ex) {
+		 * Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); }
+		 * String filesList = in.readUTF(); gui.informUser(null);
+		 * gui.informUser(filesList);
+		 * 
+		 * } catch (IOException ex) {
+		 * Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); }
+		 */
 		return "Received list of files on server.";
 	}
 
@@ -185,20 +199,15 @@ public class Client implements Runnable {
 	}
 
 	public String chooseAndSendFile() {
-		File currentFile = gui.openFileChooser();
-		if (!Objects.isNull(currentFile)) {
-			sendFile(currentFile);
-			try {
-				String serverAnawer = in.readUTF();
-				gui.informUser(serverAnawer);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return "Choosen file: " + currentFile;
-		} else {
-			return "File was not selected.";
-		}
+		/*
+		 * File currentFile = gui.openFileChooser(); if (!Objects.isNull(currentFile)) {
+		 * sendFile(currentFile); try { String serverAnawer = in.readUTF();
+		 * gui.informUser(serverAnawer); } catch (IOException e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); } return "Choosen file: " +
+		 * currentFile; } else {
+		 */
+		return "File was not selected.";
+		// }
 
 	}
 
