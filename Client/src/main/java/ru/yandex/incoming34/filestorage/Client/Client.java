@@ -131,17 +131,7 @@ public class Client implements Runnable {
 			ByteBuffer tempBuffer = ByteBuffer.allocate(256);
 
 			long receivedBytes = 0;
-			long appreciatingBytes = in.readLong();
-			
-			// ===================
-			
-			auxiliaryChannel.read(tempBuffer);
-			tempBuffer.flip();
-			byte[] tempByte = tempBuffer.array();
-			System.out.println("tempByte: " + Arrays.toString(tempByte));
-			long anotherLong = auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte);
-			System.out.println("anotherLong: " + anotherLong + " receivedBytes: " + receivedBytes);
-			// ==========================
+			long anotherLong = auxiliary.AuxiliaryMethods.readLongFromChannel(auxiliaryChannel);
 			tempBuffer.clear();
 			while ((receivedBytes != anotherLong)) {
 				buffer.clear();

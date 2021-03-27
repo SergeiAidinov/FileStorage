@@ -165,17 +165,7 @@ public class ClientHandler implements Runnable {
 		buffer.flip();
 		long transmittedBytes = 0;
 		long bytesToTransmit = outputChannel.size();
-		out.writeLong(bytesToTransmit);
-		auxiliary.AuxiliaryMethods.convertLongToByteArray(bytesToTransmit);
-		byte[] tempByte = auxiliary.AuxiliaryMethods.convertLongToByteArray(bytesToTransmit);
-		ByteBuffer tempBuffer = ByteBuffer.allocate(tempByte.length);
-		tempBuffer.put(tempByte);
-		tempBuffer.flip();
-		auxiliaryChannel.write(tempBuffer);
-		tempBuffer.clear();
-		System.out.println("convertLongToByteBuffer: " + Arrays.toString(tempByte));
-		System.out.println("LongAgain: " + auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte));
-		
+		auxiliary.AuxiliaryMethods.writeLongToChannel(bytesToTransmit, auxiliaryChannel);
 		while (transmittedBytes < bytesToTransmit) {
 			outputChannel.read(buffer);
 			buffer.flip();
