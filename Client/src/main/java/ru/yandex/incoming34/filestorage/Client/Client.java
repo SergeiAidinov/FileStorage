@@ -9,21 +9,16 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import ru.yandex.incoming34.filestorage.Client.GraphicUserInterface;
-
-
 
 public class Client implements Runnable {
 	private final Socket socket;
@@ -101,8 +96,8 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
+		auxiliary.App.hello();
 		System.out.println("downloadFile BEGIN");
-
 		filename.trim();
 		System.out.println((byte) filename.charAt(filename.length() - 1));
 		Pattern pattern = Pattern.compile("\n");
@@ -153,6 +148,7 @@ public class Client implements Runnable {
 			serverSocketChannel.close();
 			targetFileChannel.close();
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
+			
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
