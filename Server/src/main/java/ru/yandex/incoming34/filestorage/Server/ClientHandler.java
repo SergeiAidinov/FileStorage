@@ -156,16 +156,26 @@ public class ClientHandler implements Runnable {
 		int port = 1237;
 		SocketAddress hostAddress = new InetSocketAddress("localhost", port);
 		ByteChannel destinationChannel = SocketChannel.open(hostAddress);
+		ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ outputChannel + " to " + destinationChannel);
 
-		int lastByte;
 		buffer.flip();
 		long transmittedBytes = 0;
 		long bytesToTransmit = outputChannel.size();
 		out.writeLong(bytesToTransmit);
+		auxiliary.AuxiliaryMethods.convertLongToByteArray(bytesToTransmit);
+		byte[] tempByte = auxiliary.AuxiliaryMethods.convertLongToByteArray(bytesToTransmit);
+		ByteBuffer tempBuffer = ByteBuffer.allocate(tempByte.length);
+		tempBuffer.put(tempByte);
+		tempBuffer.flip();
+		auxiliaryChannel.write(tempBuffer);
+		tempBuffer.clear();
+		System.out.println("convertLongToByteBuffer: " + Arrays.toString(tempByte));
+		System.out.println("LongAgain: " + auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte));
+		
 		while (transmittedBytes < bytesToTransmit) {
 			outputChannel.read(buffer);
 			buffer.flip();
@@ -175,6 +185,7 @@ public class ClientHandler implements Runnable {
 		}
 		outputChannel.close();
 		destinationChannel.close();
+		auxiliaryChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 

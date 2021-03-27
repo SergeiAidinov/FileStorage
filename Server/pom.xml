@@ -28,6 +28,11 @@
       <version>5.7.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>ru.yandex.incoming34</groupId>
+    	<artifactId>Auxiliary</artifactId>
+    	<version>1.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>

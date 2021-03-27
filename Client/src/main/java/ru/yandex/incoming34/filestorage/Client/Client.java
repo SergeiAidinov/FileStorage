@@ -14,6 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,19 +97,12 @@ public class Client implements Runnable {
 	}
 
 	protected String downloadFile(String filename) {
-		auxiliary.App.hello();
 		System.out.println("downloadFile BEGIN");
-		filename.trim();
-		System.out.println((byte) filename.charAt(filename.length() - 1));
-		Pattern pattern = Pattern.compile("\n");
-		Matcher matcher = pattern.matcher(filename);
-		filename = matcher.replaceAll("");
-		System.out.println((byte) filename.charAt(filename.length() - 1));
+		filename = auxiliary.AuxiliaryMethods.handleInputFromTextArea(filename);
 
 		System.out.println("Fetching: " + filename);
 		int iter = 0;
 
-		
 		try {
 			out.writeUTF("download");
 			out.writeUTF(filename);
@@ -124,6 +118,7 @@ public class Client implements Runnable {
 			System.out.println();
 
 			SocketChannel sourceChannel = serverSocketChannel.accept();
+			SocketChannel auxiliaryChannel = serverSocketChannel.accept();
 
 			System.out.println("sourceChannel: " + sourceChannel);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
@@ -133,29 +128,44 @@ public class Client implements Runnable {
 					+ sourceChannel.getRemoteAddress());
 
 			ByteBuffer buffer = ByteBuffer.allocate(256);
+			ByteBuffer tempBuffer = ByteBuffer.allocate(256);
 
 			long receivedBytes = 0;
 			long appreciatingBytes = in.readLong();
-			while (receivedBytes < appreciatingBytes) {
+			
+			// ===================
+			
+			auxiliaryChannel.read(tempBuffer);
+			tempBuffer.flip();
+			byte[] tempByte = tempBuffer.array();
+			System.out.println("tempByte: " + Arrays.toString(tempByte));
+			long anotherLong = auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte);
+			System.out.println("anotherLong: " + anotherLong + " receivedBytes: " + receivedBytes);
+			// ==========================
+			tempBuffer.clear();
+			while ((receivedBytes != anotherLong)) {
 				buffer.clear();
 				sourceChannel.read(buffer);
 				iter++;
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
+				if (receivedBytes >= anotherLong) {
+					break;
+				}
+				//System.out.println(iter);
 			}
-			
+			sourceChannel.close();
 			serverSocketChannel.close();
 			targetFileChannel.close();
+			auxiliaryChannel.close();
+			buffer = null;
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes in " + iter + " iteration.");
-			
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 
 		return filename;
 
