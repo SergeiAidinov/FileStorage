@@ -52,7 +52,7 @@ public class Client implements Runnable {
 		
 		readUtilityChannel = client.open();
 		long lg = (long) (Math.random() * 10000000);
-		auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
+		//auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
 	}
 
 	private void runClient() {

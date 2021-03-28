@@ -17,14 +17,16 @@ public class Server {
 
 	public static void main(String[] args) throws IOException {
 		int port = DEFAULT_PORT;
-		
+
 		System.out.println("Server starting ... listening on port " + port);
 		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 		ServerSocket serverSocket = serverSocketChannel.socket();
 		serverSocket.bind(new InetSocketAddress(port));
 		serverSocketChannel.configureBlocking(false);
 		Selector selector = Selector.open();
-		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+		SelectionKey key = serverSocketChannel.register(selector,
+				SelectionKey.OP_ACCEPT /*| SelectionKey.OP_READ | SelectionKey.OP_WRITE */);
+
 		while (true) {
 			int n = selector.select();
 			if (n == 0)
@@ -32,21 +34,29 @@ public class Server {
 			Iterator iterator = selector.selectedKeys().iterator();
 			while (iterator.hasNext()) {
 				SocketChannel socketChannel = null;
-				SelectionKey key = (SelectionKey) iterator.next();
+				key = (SelectionKey) iterator.next();
 				if (key.isAcceptable()) {
-					
+
 					socketChannel = ((ServerSocketChannel) key.channel()).accept();
 					if (socketChannel == null) {
 						continue;
 					}
 					System.out.println("Accepted " + socketChannel);
-					
-					
+
+				} else {
+					if (key.isReadable()) {
+						SocketChannel client = (SocketChannel) key.channel();
+						System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(socketChannel));
+					} else if (key.isWritable()) {
+
+					}
 				}
-				
-				if (key.isValid()) {
-					System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(socketChannel));
-				}
+
+				/*
+				 * if (key.isValid()) {
+				 * System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(
+				 * socketChannel)); }
+				 */
 				socketChannel.close();
 				iterator.remove();
 				System.out.println("Cycle!");
