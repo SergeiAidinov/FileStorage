@@ -9,10 +9,16 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
+
+import auxiliary.AuxiliaryMethods;
 
 public class Server {
 	static InetSocketAddress hostAddress = new InetSocketAddress(1237);
+	private static int tramsmission;
 	final static int DEFAULT_PORT = 1237;
 
 	public static void main(String[] args) throws IOException {
@@ -24,30 +30,55 @@ public class Server {
 		serverSocket.bind(new InetSocketAddress(port));
 		serverSocketChannel.configureBlocking(false);
 		Selector selector = Selector.open();
-		SelectionKey key = serverSocketChannel.register(selector,
-				SelectionKey.OP_ACCEPT /*| SelectionKey.OP_READ | SelectionKey.OP_WRITE */);
+		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
 		while (true) {
-			int n = selector.select();
-			if (n == 0)
-				continue;
-			Iterator iterator = selector.selectedKeys().iterator();
-			while (iterator.hasNext()) {
-				SocketChannel socketChannel = null;
-				key = (SelectionKey) iterator.next();
-				if (key.isAcceptable()) {
+			int numReadyChannels = selector.select();
+			if (numReadyChannels == 0)
+				continue; // there are no ready channels to process
+			Set<SelectionKey> selectedKeys = selector.selectedKeys();
+			Iterator<SelectionKey> iterator = selectedKeys.iterator();
 
-					socketChannel = ((ServerSocketChannel) key.channel()).accept();
-					if (socketChannel == null) {
+			while (iterator.hasNext()) {
+				ServerSocketChannel server = null;
+				SelectionKey oneKey = iterator.next();
+				if (!oneKey.isValid()) {
+					// continue;
+				}
+				if (oneKey.isAcceptable()) {
+					server = (ServerSocketChannel) oneKey.channel();
+					SocketChannel client = server.accept();
+					
+					if (client == null) {
 						continue;
 					}
-					System.out.println("Accepted " + socketChannel);
+					client.configureBlocking(false); // must be nonblocking
+					// Register socket channel with selector for read operations.
+					//client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+					client.register(selector, (SelectionKey.OP_READ | SelectionKey.OP_WRITE), new ClientHandler());
+					System.out.println("Accepted " + server + " Client: " + client);
 
 				} else {
-					if (key.isReadable()) {
-						SocketChannel client = (SocketChannel) key.channel();
-						System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(socketChannel));
-					} else if (key.isWritable()) {
+					if (oneKey.isReadable()) {
+						SocketChannel client = (SocketChannel) oneKey.channel();
+						ByteBuffer buffer = ByteBuffer.allocate(256);
+						client.read(buffer);
+						if (!Objects.isNull(buffer)) {
+							String command = AuxiliaryMethods.readStringFromByteBuffer(buffer);
+							System.out.println("Command: " + command);
+							ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
+							System.out.println("clientHandler: " + clientHandler.getClass());
+							clientHandler.handleCommand(command);
+							buffer = null;
+						}
+
+					} else if (oneKey.isWritable()) {
+						SocketChannel client = (SocketChannel) oneKey.channel();
+						if (tramsmission != 1) {
+							client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Good bye developer!"));
+							tramsmission++;
+						}
+						// System.out.println("Transmitted: Good bye developer!");
 
 					}
 				}
@@ -57,9 +88,9 @@ public class Server {
 				 * System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(
 				 * socketChannel)); }
 				 */
-				socketChannel.close();
+				// server.close();
 				iterator.remove();
-				System.out.println("Cycle!");
+				// System.out.println("Cycle!");
 			}
 		}
 	}

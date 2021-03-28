@@ -67,21 +67,34 @@ public class AuxiliaryMethods {
 		ByteBuffer tempBuffer = ByteBuffer.allocate(bytes.length);
 		tempBuffer.put(bytes);
 		tempBuffer.flip();
+		tempBuffer.limit(string.length());
 		return tempBuffer;
 		
 	}
 	
-	public static String readStringFromChannel(ReadableByteChannel channel) {
-		ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
-		try {
-			channel.read(tempBuffer);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public static String readStringFromByteBuffer(ByteBuffer tempBuffer) {
+		//ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
+		
+		//String string = StandardCharsets.UTF_8.decode(tempBuffer).toString();
+		StringBuilder stringBuilder = new StringBuilder();
+		byte[] bytes = tempBuffer.array();
+		for (int i = 0; i < tempBuffer.limit(); i++) {
+			stringBuilder.append((char) bytes[i]);
 		}
-		String string = StandardCharsets.UTF_8.decode(tempBuffer).toString();
+		String string = stringBuilder.toString();
+		//System.out.println("readStringFromChannel: " + string);
 		return string;
 		
+	}
+	
+	public static void writeStringToChannel(String string, ByteChannel channel) {
+		ByteBuffer byteBuffer = convertStringToByteBuffer(string);
+		try {
+			channel.write(byteBuffer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		byteBuffer.clear();
 	}
 	
 }

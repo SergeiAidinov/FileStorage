@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import auxiliary.AuxiliaryMethods;
+
 public class Client implements Runnable {
 	// private final SocketChannel socket;
 	// private final DataInputStream in;
@@ -34,12 +36,13 @@ public class Client implements Runnable {
 	private ByteChannel readUtilityChannel;
 	InetSocketAddress hostAddress;
 	private final GraphicUserInterface gui;
+	SocketChannel client = null;
 
 	public Client() throws IOException {
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
 		gui = new GraphicUserInterface(this);
 		// socket = new Socket("localhost", 1237);
-		SocketChannel client = SocketChannel.open();
+		client = SocketChannel.open();
 		client.connect(hostAddress);
 
 		/*
@@ -53,6 +56,13 @@ public class Client implements Runnable {
 		readUtilityChannel = client.open();
 		long lg = (long) (Math.random() * 10000000);
 		//auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
+		//auxiliary.AuxiliaryMethods.writeStringToChannel("Hello, developer", client);
+		//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello developer!"));
+		//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello lazy developer!"));
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		client.read(buffer);
+		buffer.flip();
+		System.out.println("String: " + AuxiliaryMethods.readStringFromByteBuffer(buffer));
 	}
 
 	private void runClient() {
@@ -105,8 +115,8 @@ public class Client implements Runnable {
 	protected String deleteFile(String filename) {
 		String status = null;
 		try {
-			writeUtilityChannel.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("remove"));
-			writeUtilityChannel.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("remove"));
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
 			// out.writeUTF("remove");
 			// out.writeUTF(filename);
 			// status = in.readUTF();

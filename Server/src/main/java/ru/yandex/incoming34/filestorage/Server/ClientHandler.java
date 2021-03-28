@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Обработчик входящих клиентов
  */
-public class ClientHandler implements Runnable {
+public class ClientHandler {
 	//private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
@@ -46,34 +46,26 @@ public class ClientHandler implements Runnable {
 	int port = 1237;
 	
 
-	public ClientHandler(ServerSocketChannel server) {
+	public ClientHandler() {
 		//this.socket = server;
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
-		try {
-			writeUtilityChannel = SocketChannel.open(hostAddress);
-			readUtilityChannel = SocketChannel.open(hostAddress);
+		//try {
+			//writeUtilityChannel = SocketChannel.open(hostAddress);
+			//readUtilityChannel = SocketChannel.open(hostAddress);
 			//out = new DataOutputStream(server.getOutputStream());
 			//in = new DataInputStream(server.getInputStream());
 			System.out.println("ClientHandler created!");
+			/*
 		} catch (IOException ex) {
 			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		*/
 
 	}
 
-	@Override
-	public void run() {
-		String command;
+	public void handleCommand(String command) {
+		System.out.println("In handleCommand: " + command);
 		try {
-			while (true) {
-
-				//try {
-					//command = in.readUTF();
-					command = auxiliary.AuxiliaryMethods.readStringFromChannel(readUtilityChannel);
-					System.out.println("command: " + command);
-				/*}  catch (EOFException eofEx) {
-					continue;
-				} */
 
 				switch (command) {
 				case "upload": {
@@ -81,6 +73,7 @@ public class ClientHandler implements Runnable {
 					break;
 				}
 				case "remove": {
+					System.out.println("Received command REMOVE");
 					performRemove();
 					break;
 				}
@@ -95,7 +88,7 @@ public class ClientHandler implements Runnable {
 				}
 
 				}
-			}
+			
 		}
 
 		catch (IOException ex) {
