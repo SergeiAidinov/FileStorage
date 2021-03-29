@@ -65,11 +65,14 @@ public class Server {
 						client.read(buffer);
 						if (!Objects.isNull(buffer)) {
 							String command = AuxiliaryMethods.readStringFromByteBuffer(buffer);
+							command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
+							if (command.length() != 0) {
 							System.out.println("Command: " + command);
 							ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
 							System.out.println("clientHandler: " + clientHandler.getClass());
 							clientHandler.handleCommand(command);
-							buffer = null;
+							buffer.clear();
+							}
 						}
 
 					} else if (oneKey.isWritable()) {

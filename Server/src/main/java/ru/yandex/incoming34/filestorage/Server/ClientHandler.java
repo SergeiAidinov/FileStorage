@@ -48,7 +48,6 @@ public class ClientHandler {
 	InetSocketAddress hostAddress;//
 	int port = 1237;
 	SocketChannel servedClient;
-	
 
 	public ClientHandler(SocketChannel client) {
 		servedClient = client;
@@ -68,15 +67,20 @@ public class ClientHandler {
 	}
 
 	public void handleCommand(String command) {
+		if (Objects.isNull(command)) {
+			return;
+		}
 		command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
+		if (command.length() == 0) {
+			return;
+		}
 		System.out.println("In handleCommand: " + command + " " + command.length());
 		String statement = command.substring(0, 3);
 		String operand = null;
 		if (command.length() > 3) {
 			operand = command.substring(3, command.length());
-		} 
-		
-		
+		}
+
 		System.out.println(statement + " " + operand);
 
 		switch (statement) {
@@ -136,10 +140,11 @@ public class ClientHandler {
 		}
 	}
 
-	private void performRemove(String filename) {
+	private void performRemove(String filename) { // working
 		if (Objects.isNull(filename)) {
 			return;
 		}
+		filename = AuxiliaryMethods.handleInputFromTextArea(filename);
 		System.out.println("performRemove()");
 		File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + filename);
 		if (Objects.isNull(file) || file.getName().length() == 0) {
@@ -159,7 +164,7 @@ public class ClientHandler {
 	}
 
 	private void performDownload(String operand) throws IOException {
-		System.out.println("performDownload() BEGIN");
+		System.out.println("performDownload() BEGIN with operand " + operand);
 		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println(sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
@@ -179,12 +184,12 @@ public class ClientHandler {
 		buffer.flip();
 		long transmittedBytes = 0;
 		long bytesToTransmit = outputChannel.size();
-		auxiliary.AuxiliaryMethods.writeLongToChannel(bytesToTransmit, auxiliaryChannel);
+		auxiliary.AuxiliaryMethods.writeLongToChannel(bytesToTransmit, servedClient);
 		while (transmittedBytes < bytesToTransmit) {
 			outputChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
-			destinationChannel.write(buffer);
+			servedClient.write(buffer);
 			buffer.clear();
 		}
 		outputChannel.close();
@@ -201,7 +206,7 @@ public class ClientHandler {
 		return qtyBuffers;
 	}
 
-	private  void showListOfFiles() {
+	private void showListOfFiles() {
 		File dir = new File("/media/sergei/Linux/ServerFiles/");
 		File[] allFiles = dir.listFiles();
 		StringBuffer listOfFiles = new StringBuffer();
@@ -210,28 +215,26 @@ public class ClientHandler {
 			listOfFiles.append(oneFile).append("\n");
 			System.out.println(oneFile);
 		}
-		//instatntWriningIntoStream(listOfFiles.toString());
+		// instatntWriningIntoStream(listOfFiles.toString());
 		String list = listOfFiles.toString();
-		//list = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(list);
+		// list = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(list);
 		ByteBuffer byteBuffer = AuxiliaryMethods.convertStringToByteBuffer(list);
 		byteBuffer.limit(list.length());
-		 try {
+		try {
 			servedClient.write(byteBuffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 
 	}
 
 	private void instatntWriningIntoStream(String message) {
 		System.out.println(message);
 		ByteBuffer buffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(message);
-		
-			//out.writeUTF(message);
-			//out.flush();
-		
+
+		// out.writeUTF(message);
+		// out.flush();
 
 	}
 }

@@ -88,8 +88,8 @@ public class AuxiliaryMethods {
 	}
 	
 	public static String leaveOnlyMeaningfullSymbols(String string) {
-		return string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ .]", "");
-		//return string.replaceAll("[^\\a-zA-Zа-яА-Я .]", "");
+		//return string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ.]", "");
+		return string.replaceAll("[^\\a-zA-Zа-яА-Я .]", "");
 	}
 
 	public static void writeStringToChannel(String string, ByteChannel channel) {

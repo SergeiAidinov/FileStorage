@@ -148,6 +148,9 @@ public class Client implements Runnable {
 			if (!targetFile.exists()) {
 				targetFile.createNewFile();
 			}
+			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
+					StandardOpenOption.APPEND);
+			/*
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
 			System.out.println();
@@ -161,16 +164,17 @@ public class Client implements Runnable {
 			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
 			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
 					+ sourceChannel.getRemoteAddress());
-
+*/
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			ByteBuffer tempBuffer = ByteBuffer.allocate(256);
 
 			long receivedBytes = 0;
-			long anotherLong = auxiliary.AuxiliaryMethods.readLongFromChannel(auxiliaryChannel);
+			long anotherLong = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
+			System.out.println("Expecting " + anotherLong +" bytes.");
 			tempBuffer.clear();
 			while ((receivedBytes != anotherLong)) {
 				buffer.clear();
-				sourceChannel.read(buffer);
+				client.read(buffer);
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
@@ -178,10 +182,10 @@ public class Client implements Runnable {
 					break;
 				}
 			}
-			sourceChannel.close();
-			serverSocketChannel.close();
+			//sourceChannel.close();
+			//serverSocketChannel.close();
 			targetFileChannel.close();
-			auxiliaryChannel.close();
+			//auxiliaryChannel.close();
 			buffer = null;
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 
