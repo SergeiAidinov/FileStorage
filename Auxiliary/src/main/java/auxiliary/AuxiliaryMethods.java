@@ -3,10 +3,8 @@ package auxiliary;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,23 +71,18 @@ public class AuxiliaryMethods {
 	}
 
 	public static String readStringFromByteBuffer(ByteBuffer tempBuffer) {
-		// ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
-
 		String string = StandardCharsets.UTF_16.decode(tempBuffer).toString();
-		//String string = tempBuffer.toString();
 		StringBuilder stringBuilder = new StringBuilder();
 		byte[] bytes = tempBuffer.array();
 		for (int i = 0; i < tempBuffer.limit(); i++) {
 			stringBuilder.append((char) bytes[i]);
 		}
 		string = stringBuilder.toString();
-		//string = string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ .]", "");
 		return string;
 
 	}
-	
+
 	public static String leaveOnlyMeaningfullSymbols(String string) {
-		//return string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ.]", "");
 		return string.replaceAll("[^\\a-zA-Zа-яА-Я .]", "");
 	}
 

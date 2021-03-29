@@ -50,7 +50,7 @@ public class GraphicUserInterface {
 			System.out.println(myClient.deleteFile(textArea.getText()));
 		});
 		downloadButton.addActionListener(dnl -> {
-			System.out.println(myClient.downloadFile(textArea.getText()));
+			System.out.println(myClient.receiveFileFromServer(textArea.getText()));
 		});
 		listOfFiles.addActionListener(lst -> {
 			System.out.println(myClient.showListOfFiles());

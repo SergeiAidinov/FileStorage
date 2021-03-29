@@ -60,17 +60,19 @@ public class Server {
 				} else {
 					if (oneKey.isReadable()) {
 						SocketChannel client = (SocketChannel) oneKey.channel();
-						ByteBuffer buffer = ByteBuffer.allocate(256);
-						client.read(buffer);
-						if (!Objects.isNull(buffer)) {
-							String command = AuxiliaryMethods.readStringFromByteBuffer(buffer);
+						ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(256);
+						client.read(auxiliaryBuffer);
+						if (!Objects.isNull(auxiliaryBuffer)) {
+							String command = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
 							command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
-							buffer.clear();
+							auxiliaryBuffer.clear();
+							//iterator.remove();
 							if (command.length() != 0) {
-								System.out.println("Command: " + command);
 								ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
+								System.out.println("Command: " + command);
 								System.out.println("clientHandler: " + clientHandler.getClass());
 								clientHandler.handleCommand(command);
+
 							}
 						}
 
@@ -81,10 +83,8 @@ public class Server {
 									.convertStringToByteBuffer("You have connected to server " + Server.class));
 							tramsmission++;
 						}
-
 					}
 				}
-
 				iterator.remove();
 			}
 		}

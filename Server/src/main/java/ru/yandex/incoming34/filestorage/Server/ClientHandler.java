@@ -1,38 +1,17 @@
 package ru.yandex.incoming34.filestorage.Server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UTFDataFormatException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import auxiliary.AuxiliaryMethods;
 
@@ -40,21 +19,22 @@ import auxiliary.AuxiliaryMethods;
  * Обработчик входящих клиентов
  */
 public class ClientHandler {
-	private DataOutputStream out;
-	private DataInputStream in;
-	private ByteChannel writeUtilityChannel;
-	private ByteChannel readUtilityChannel;
 	InetSocketAddress hostAddress;//
 	int port = 1237;
 	SocketChannel servedClient;
-
+	private  boolean busy = false;
+	
 	public ClientHandler(SocketChannel client) {
+		
 		servedClient = client;
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
 		System.out.println("ClientHandler created!");
-
 	}
-
+	
+	public boolean getBusy() {
+		return busy;
+	}
+	
 	public void handleCommand(String command) {
 		if (Objects.isNull(command)) {
 			return;
@@ -76,17 +56,20 @@ public class ClientHandler {
 
 		case "UPL": {
 			System.out.println("Received command UPLOAD");
-			performUpload(operand);
+			busy = true;
+			receiveFileFromClient(operand);
 			break;
 		}
 		case "RMV": {
 			System.out.println("Received command REMOVE");
+			busy = true;
 			performRemove(operand);
 			break;
 		}
 		case "DNL": {
 			try {
-				performDownload(operand);
+				busy = true;
+				sendFileToClient(operand);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -94,7 +77,8 @@ public class ClientHandler {
 			break;
 		}
 		case "LST": {
-			showListOfFiles();
+			busy = true;
+			showClientListOfFiles();
 			break;
 		}
 		default: {
@@ -103,8 +87,12 @@ public class ClientHandler {
 		}
 	}
 
-	private void performUpload(String operand) {
-		long lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
+	private void receiveFileFromClient(String operand) {
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		long lengthOfExpectedFile = 0;
+		while (lengthOfExpectedFile == 0){
+		lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
+		}
 		Path targetPath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println("targetPath: " + targetPath);
 		File targetFile = new File(targetPath.toString());
@@ -116,7 +104,6 @@ public class ClientHandler {
 			}
 			targetFile.setWritable(true);
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
-			ByteBuffer buffer = ByteBuffer.allocate(256);
 			long receivedBytes = 0;
 
 			System.out.println("Expecting file of " + lengthOfExpectedFile + " bytes.");
@@ -132,6 +119,7 @@ public class ClientHandler {
 			}
 			targetFileChannel.close();
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
+			busy = false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,9 +147,10 @@ public class ClientHandler {
 		} else {
 			instatntWriningIntoStream("File does not exist.");
 		}
+		busy = false;
 	}
 
-	private void performDownload(String operand) throws IOException {
+	private void sendFileToClient(String operand) throws IOException {
 		System.out.println("performDownload() BEGIN with operand " + operand);
 		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println("sourceFile: " + sourceFile);
@@ -172,7 +161,8 @@ public class ClientHandler {
 		FileChannel sourceChannel = FileChannel.open(sourcePath);
 		System.out.println("sourceChannel: " + sourceChannel);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
-		long sizeOfsourceFile = sourceFile.getCanonicalFile().length();
+		long sizeOfsourceFile = sourceFile.length();
+		AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ sourceChannel + " to " + servedClient);
 
@@ -189,6 +179,7 @@ public class ClientHandler {
 		}
 		sourceChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
+		busy = false;
 	}
 
 	private long calculateQuantityOfBuffers(File oneFile, ByteBuffer oneBuffer) {
@@ -199,7 +190,7 @@ public class ClientHandler {
 		return qtyBuffers;
 	}
 
-	private void showListOfFiles() {
+	private void showClientListOfFiles() {
 		File dir = new File("/media/sergei/Linux/ServerFiles/");
 		File[] allFiles = dir.listFiles();
 		StringBuffer listOfFiles = new StringBuffer();
@@ -217,7 +208,7 @@ public class ClientHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		busy = false;
 	}
 
 	private void instatntWriningIntoStream(String message) {
