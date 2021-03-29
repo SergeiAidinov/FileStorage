@@ -119,27 +119,41 @@ public class ClientHandler /* implements Runnable */ {
 
 	private void performUpload(String operand) {
 
-		FileOutputStream fos = null;
+		Path targetPath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + operand);
+		System.out.println("targetPath: " + targetPath);
+		File targetFile = new File(targetPath.toString());
+		
 		try {
-			File fileFromStream = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
-			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + fileFromStream.getName());
-			System.out.println("Uploaning file: " + file);
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			long size = in.readLong();
-			fos = new FileOutputStream(file);
-			byte[] buffer = new byte[256];
-			for (int i = 0; i < (size + 255) / 256; i++) {
-				int read = in.read(buffer);
-				fos.write(buffer, 0, read);
-			}
-			fos.close();
-			instatntWriningIntoStream(file.getName() + " succesfully uploaded to server.");
-		} catch (Exception e) {
+			
+		if (!targetFile.exists()) {
+				targetFile.createNewFile();
+		}
+		targetFile.setWritable(true);
+		FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		long receivedBytes = 0;
+		long anotherLong = AuxiliaryMethods.readLongFromChannel(servedClient);
+		System.out.println("Expecting file of " + anotherLong + " bytes.");
+		while ((true)) {
+			servedClient.read(buffer);
+			buffer.flip();
+			receivedBytes += buffer.limit();
 
+			targetFileChannel.write(buffer);
+
+			if (receivedBytes >= anotherLong) {
+				break;
+			}
+		}
+		targetFileChannel.close();
+		System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+		
+	
 
 	private void performRemove(String filename) { // working
 		if (Objects.isNull(filename)) {

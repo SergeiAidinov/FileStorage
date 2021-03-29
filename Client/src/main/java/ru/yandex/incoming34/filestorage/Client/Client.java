@@ -17,6 +17,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -74,35 +76,55 @@ public class Client implements Runnable {
 
 	}
 
-	protected String sendFile(File filename) {
-		System.out.println("Sending file: " + filename);
-		FileInputStream fis = null;
-		if (filename.length() == 0) {
-			return ("File name needed.");
-
-		}
+	protected String sendFile(File sourceFile) {
+		System.out.println("Sending file: " + sourceFile);
 		try {
-			File file = filename;
-			if (file.exists()) {
-				System.out.println("Transmitting file: " + filename.getName());
-				long length = file.length();
-				fis = new FileInputStream(file);
-				int read = 0;
-				byte[] buffer = new byte[256];
-				while ((read = fis.read(buffer)) != -1) {
-					System.out.print('.');
-				}
-				String status = "String";
-				fis.close();
-				System.out.println("File transmitted.");
-				return status;
-			} else {
-				return "File " + file + " does not exists";
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("UPL" + sourceFile.getName()));
+			auxiliary.AuxiliaryMethods.writeLongToChannel(sourceFile.length(), client);
+
+			Path sourcePath = Paths.get(sourceFile.getAbsolutePath());
+			System.out.println("sourcePath: " + sourcePath);
+			FileSystem fileSystem = FileSystems.getDefault();
+			System.out.println(fileSystem);
+			FileChannel sourceChannel = FileChannel.open(sourcePath);
+			System.out.println("sourceChannel: " + sourceChannel);
+			ByteBuffer buffer = ByteBuffer.allocate(256);
+
+			long sizeOfsourceFile = sourceFile.length();
+			System.out.println("Uploading file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
+					+ sourceChannel + " to " + client);
+
+			buffer.flip();
+			long transmittedBytes = 0;
+
+			while (transmittedBytes < sizeOfsourceFile) {
+				sourceChannel.read(buffer);
+				buffer.flip();
+				client.write(buffer);
+
+				//buffer.flip();
+				transmittedBytes += buffer.limit();
+				// client.write(buffer);
+				buffer.clear();
+
+				/*
+				 * long response = AuxiliaryMethods.readLongFromChannel(servedClient);
+				 * System.out.println("RecievedBytes: " + response); while (true) { if
+				 * (transmittedBytes > response) { continue; } }
+				 */
 
 			}
+
+			sourceChannel.close();
+
+			// destinationChannel.close();
+			// auxiliaryChannel.close();
+			System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		return "Some error";
 	}
 
@@ -148,7 +170,7 @@ public class Client implements Runnable {
 			System.out.println("Expecting file of " + anotherLong + " bytes.");
 			while ((true)) {
 				client.read(buffer);
-				buffer.flip(); 
+				buffer.flip();
 				receivedBytes += buffer.limit();
 
 				targetFileChannel.write(buffer);
@@ -192,14 +214,14 @@ public class Client implements Runnable {
 	}
 
 	public String chooseAndSendFile() {
-		/*
-		 * File currentFile = gui.openFileChooser(); if (!Objects.isNull(currentFile)) {
-		 * sendFile(currentFile); try { String serverAnawer = in.readUTF();
-		 * gui.informUser(serverAnawer); } catch (IOException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } return "Choosen file: " +
-		 * currentFile; } else {
-		 */
-		return "File was not selected.";
+
+		File file = gui.openFileChooser();
+
+		if (Objects.isNull(file)) {
+			return "There is no such a file!";
+		}
+		sendFile(file);
+		return "Sending file: " + file;
 		// }
 
 	}
