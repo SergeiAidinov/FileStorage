@@ -5,11 +5,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
@@ -52,13 +54,15 @@ public class Client implements Runnable {
 		 * InetSocketAddress("localhost", port); sc.connect(addr);
 		 */
 		writeUtilityChannel = client.open();
-		
+
 		readUtilityChannel = client.open();
 		long lg = (long) (Math.random() * 10000000);
-		//auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
-		//auxiliary.AuxiliaryMethods.writeStringToChannel("Hello, developer", client);
-		//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello developer!"));
-		//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello lazy developer!"));
+		// auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
+		// auxiliary.AuxiliaryMethods.writeStringToChannel("Hello, developer", client);
+		// client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello
+		// developer!"));
+		// client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello lazy
+		// developer!"));
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		client.read(buffer);
 		buffer.flip();
@@ -81,18 +85,13 @@ public class Client implements Runnable {
 			File file = filename;
 			if (file.exists()) {
 				System.out.println("Transmitting file: " + filename.getName());
-				// out.writeUTF("upload");
-				// out.writeUTF(filename.toString());
 				long length = file.length();
-				// out.writeLong(length);
 				fis = new FileInputStream(file);
 				int read = 0;
 				byte[] buffer = new byte[256];
 				while ((read = fis.read(buffer)) != -1) {
-					// out.write(buffer, 0, read);
 					System.out.print('.');
 				}
-				// out.flush();
 				String status = "String";
 				fis.close();
 				System.out.println("File transmitted.");
@@ -116,10 +115,6 @@ public class Client implements Runnable {
 		String status = null;
 		try {
 			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("RMV" + filename));
-			//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
-			// out.writeUTF("remove");
-			// out.writeUTF(filename);
-			// status = in.readUTF();
 			gui.informUser(status);
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -139,8 +134,6 @@ public class Client implements Runnable {
 		}
 		System.out.println("Fetching: " + filename);
 		try {
-			// out.writeUTF("download");
-			// out.writeUTF(filename);
 			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			System.out.println("targetPath: " + targetPath);
 			File targetFile = new File(targetPath.toString());
@@ -149,51 +142,24 @@ public class Client implements Runnable {
 				targetFile.createNewFile();
 			}
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
-			//targetFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, 16384);
-			
-			/*
-			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
-			System.out.println();
-
-			SocketChannel sourceChannel = serverSocketChannel.accept();
-			SocketChannel auxiliaryChannel = serverSocketChannel.accept();
-
-			System.out.println("sourceChannel: " + sourceChannel);
-			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
-			System.out.println("Reading from channel " + sourceChannel + " into " + sourceChannel);
-			System.out.println("sourceChannel: " + sourceChannel.isOpen() + " " + sourceChannel.isConnected() + " "
-					+ sourceChannel.getRemoteAddress());
-*/
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			//ByteBuffer tempBuffer = ByteBuffer.allocate(256);
-			
-		
 			long receivedBytes = 0;
-			long anotherLong = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
-			System.out.println("Received " + receivedBytes + " bytes. Expecting " + anotherLong +" bytes.");
-			//tempBuffer.clear();
-			buffer.clear();
+			long anotherLong = AuxiliaryMethods.readLongFromChannel(client);
+			System.out.println("Expecting file of " + anotherLong + " bytes.");
 			while ((true)) {
 				client.read(buffer);
-				buffer.flip();
-				//buffer.compact();
+				buffer.flip(); 
 				receivedBytes += buffer.limit();
+
 				targetFileChannel.write(buffer);
-				//AuxiliaryMethods.writeLongToChannel(receivedBytes, client);
-				buffer.clear();
-				
+
 				if (receivedBytes >= anotherLong) {
 					break;
 				}
-				
+
 			}
-			//sourceChannel.close();
-			//serverSocketChannel.close();
+
 			targetFileChannel.close();
-			//auxiliaryChannel.close();
-			//buffer = null;
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 
 		} catch (IOException e) {
@@ -206,7 +172,7 @@ public class Client implements Runnable {
 	}
 
 	protected String showListOfFiles() {
-		
+
 		try {
 			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("LST"));
 			ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
@@ -218,17 +184,6 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		/*
-		 * try {
-		 * 
-		 * try { //out.writeUTF("listOfFiles"); } catch (IOException ex) {
-		 * Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); }
-		 * String filesList = in.readUTF(); gui.informUser(null);
-		 * gui.informUser(filesList);
-		 * 
-		 * } catch (IOException ex) {
-		 * Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); }
-		 */
 		return "Received list of files on server.";
 	}
 

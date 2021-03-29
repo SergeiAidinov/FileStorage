@@ -39,7 +39,7 @@ import auxiliary.AuxiliaryMethods;
 /**
  * Обработчик входящих клиентов
  */
-public class ClientHandler /*implements Runnable */{
+public class ClientHandler /* implements Runnable */ {
 	// private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
@@ -63,7 +63,7 @@ public class ClientHandler /*implements Runnable */{
 		 * Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
 		 * }
 		 */
-		//run();
+		// run();
 
 	}
 
@@ -174,10 +174,9 @@ public class ClientHandler /*implements Runnable */{
 		System.out.println(fileSystem);
 		FileChannel sourceChannel = FileChannel.open(sourcePath);
 		System.out.println("sourceChannel: " + sourceChannel);
-		
 
-		//ByteChannel destinationChannel = SocketChannel.open(hostAddress);
-		//ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
+		// ByteChannel destinationChannel = SocketChannel.open(hostAddress);
+		// ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
@@ -185,30 +184,27 @@ public class ClientHandler /*implements Runnable */{
 
 		buffer.flip();
 		long transmittedBytes = 0;
-		
+
 		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
-		//ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(1024);
-		//auxiliaryBuffer.putLong(sizeOfsourceFile);
-		//servedClient.write(auxiliaryBuffer);
+
 		while (transmittedBytes < sizeOfsourceFile) {
 			sourceChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
 			buffer.clear();
+
 			/*
-			long response = AuxiliaryMethods.readLongFromChannel(servedClient);
-			System.out.println("RecievedBytes: " + response);
-			while (true) {
-				if (transmittedBytes > response) {
-					continue;
-				}
-			}
-			*/
+			 * long response = AuxiliaryMethods.readLongFromChannel(servedClient);
+			 * System.out.println("RecievedBytes: " + response); while (true) { if
+			 * (transmittedBytes > response) { continue; } }
+			 */
+
 		}
+
 		sourceChannel.close();
-		//destinationChannel.close();
-		//auxiliaryChannel.close();
+		// destinationChannel.close();
+		// auxiliaryChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 
@@ -253,10 +249,8 @@ public class ClientHandler /*implements Runnable */{
 	}
 
 	/*
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-*/
+	 * @Override public void run() { // TODO Auto-generated method stub
+	 * 
+	 * }
+	 */
 }
