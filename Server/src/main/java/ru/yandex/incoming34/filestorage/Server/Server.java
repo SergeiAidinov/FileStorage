@@ -65,19 +65,19 @@ public class Server {
 						if (!Objects.isNull(buffer)) {
 							String command = AuxiliaryMethods.readStringFromByteBuffer(buffer);
 							command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
+							buffer.clear();
 							if (command.length() != 0) {
 								System.out.println("Command: " + command);
 								ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
 								System.out.println("clientHandler: " + clientHandler.getClass());
 								clientHandler.handleCommand(command);
-								buffer.clear();
 							}
 						}
 
 					} else if (oneKey.isWritable()) {
 						SocketChannel client = (SocketChannel) oneKey.channel();
 						if (tramsmission != 1) {
-							client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Good bye developer!"));
+							client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("You have connected to server " + Server.class));
 							tramsmission++;
 						}
 

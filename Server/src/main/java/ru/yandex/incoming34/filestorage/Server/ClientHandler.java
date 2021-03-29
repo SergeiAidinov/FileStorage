@@ -76,6 +76,7 @@ public class ClientHandler /* implements Runnable */ {
 		switch (statement) {
 
 		case "UPL": {
+			System.out.println("Received command UPLOAD");
 			performUpload(operand);
 			break;
 		}
@@ -118,7 +119,7 @@ public class ClientHandler /* implements Runnable */ {
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			long receivedBytes = 0;
-			
+
 			System.out.println("Expecting file of " + lengthOfExpectedFile + " bytes.");
 			while ((true)) {
 				buffer.clear();
@@ -127,7 +128,7 @@ public class ClientHandler /* implements Runnable */ {
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 				if (receivedBytes >= lengthOfExpectedFile) {
-					buffer = null;
+					// buffer = null;
 					break;
 				}
 			}
@@ -187,7 +188,7 @@ public class ClientHandler /* implements Runnable */ {
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
-			//buffer.clear();
+			// buffer.clear();
 		}
 		sourceChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");

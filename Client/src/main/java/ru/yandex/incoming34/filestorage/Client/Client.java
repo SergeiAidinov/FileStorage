@@ -89,8 +89,6 @@ public class Client implements Runnable {
 				buffer.clear();
 			}
 			sourceChannel.close();
-
-			sourceChannel.close();
 			System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -141,10 +139,10 @@ public class Client implements Runnable {
 			long anotherLong = AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + anotherLong + " bytes.");
 			while ((true)) {
+				buffer.clear();
 				client.read(buffer);
 				buffer.flip();
 				receivedBytes += buffer.limit();
-
 				targetFileChannel.write(buffer);
 
 				if (receivedBytes >= anotherLong) {
