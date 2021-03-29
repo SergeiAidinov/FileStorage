@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import com.google.common.primitives.Longs;
 
-
 public class AuxiliaryMethods {
 
 	public static String handleInputFromTextArea(String string) {
@@ -26,16 +25,16 @@ public class AuxiliaryMethods {
 	public static byte[] convertLongToByteArray(long bytesToTransmit) {
 		byte[] bytes = Longs.toByteArray(bytesToTransmit);
 		return bytes;
-		
+
 	}
-	
+
 	public static long convertByteArrayToLong(byte[] bytes) {
 		long result = Longs.fromByteArray(bytes);
 		return result;
-		
+
 	}
-	
-	public static void writeLongToChannel (long number, ByteChannel channel) {
+
+	public static void writeLongToChannel(long number, ByteChannel channel) {
 		byte[] tempByte = convertLongToByteArray(number);
 		ByteBuffer tempBuffer = ByteBuffer.allocate(tempByte.length);
 		tempBuffer.put(tempByte);
@@ -47,7 +46,7 @@ public class AuxiliaryMethods {
 		}
 		tempBuffer.clear();
 	}
-	
+
 	public static long readLongFromChannel(ByteChannel channel) {
 		ByteBuffer tempBuffer = ByteBuffer.allocate(256);
 		try {
@@ -61,7 +60,7 @@ public class AuxiliaryMethods {
 		long anotherLong = auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte);
 		return anotherLong;
 	}
-	
+
 	public static ByteBuffer convertStringToByteBuffer(String string) {
 		byte[] bytes = string.getBytes(Charset.forName("UTF-8"));
 		ByteBuffer tempBuffer = ByteBuffer.allocate(bytes.length);
@@ -69,24 +68,30 @@ public class AuxiliaryMethods {
 		tempBuffer.flip();
 		tempBuffer.limit(string.length());
 		return tempBuffer;
-		
+
 	}
-	
+
 	public static String readStringFromByteBuffer(ByteBuffer tempBuffer) {
-		//ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
-		
-		//String string = StandardCharsets.UTF_8.decode(tempBuffer).toString();
+		// ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
+
+		String string = StandardCharsets.UTF_16.decode(tempBuffer).toString();
+		//String string = tempBuffer.toString();
 		StringBuilder stringBuilder = new StringBuilder();
 		byte[] bytes = tempBuffer.array();
 		for (int i = 0; i < tempBuffer.limit(); i++) {
 			stringBuilder.append((char) bytes[i]);
 		}
-		String string = stringBuilder.toString();
-		//System.out.println("readStringFromChannel: " + string);
+		string = stringBuilder.toString();
+		//string = string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ .]", "");
 		return string;
-		
+
 	}
 	
+	public static String leaveOnlyMeaningfullSymbols(String string) {
+		return string.replaceAll("[^\\da-zA-Zа-яёА-ЯЁ .]", "");
+		//return string.replaceAll("[^\\a-zA-Zа-яА-Я .]", "");
+	}
+
 	public static void writeStringToChannel(String string, ByteChannel channel) {
 		ByteBuffer byteBuffer = convertStringToByteBuffer(string);
 		try {
@@ -96,5 +101,5 @@ public class AuxiliaryMethods {
 		}
 		byteBuffer.clear();
 	}
-	
+
 }

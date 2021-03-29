@@ -55,7 +55,7 @@ public class Server {
 					client.configureBlocking(false); // must be nonblocking
 					// Register socket channel with selector for read operations.
 					//client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-					client.register(selector, (SelectionKey.OP_READ | SelectionKey.OP_WRITE), new ClientHandler());
+					client.register(selector, (SelectionKey.OP_READ | SelectionKey.OP_WRITE), new ClientHandler(client));
 					System.out.println("Accepted " + server + " Client: " + client);
 
 				} else {

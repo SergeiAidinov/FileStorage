@@ -21,6 +21,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -33,70 +34,85 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import auxiliary.AuxiliaryMethods;
+
 /**
  * Обработчик входящих клиентов
  */
 public class ClientHandler {
-	//private final Socket socket;
+	// private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
 	private ByteChannel writeUtilityChannel;
 	private ByteChannel readUtilityChannel;
-	InetSocketAddress hostAddress;// 
+	InetSocketAddress hostAddress;//
 	int port = 1237;
+	SocketChannel servedClient;
 	
 
-	public ClientHandler() {
-		//this.socket = server;
+	public ClientHandler(SocketChannel client) {
+		servedClient = client;
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
-		//try {
-			//writeUtilityChannel = SocketChannel.open(hostAddress);
-			//readUtilityChannel = SocketChannel.open(hostAddress);
-			//out = new DataOutputStream(server.getOutputStream());
-			//in = new DataInputStream(server.getInputStream());
-			System.out.println("ClientHandler created!");
-			/*
-		} catch (IOException ex) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		*/
+		// try {
+		// writeUtilityChannel = SocketChannel.open(hostAddress);
+		// readUtilityChannel = SocketChannel.open(hostAddress);
+		// out = new DataOutputStream(server.getOutputStream());
+		// in = new DataInputStream(server.getInputStream());
+		System.out.println("ClientHandler created!");
+		/*
+		 * } catch (IOException ex) {
+		 * Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+		 * }
+		 */
 
 	}
 
 	public void handleCommand(String command) {
-		System.out.println("In handleCommand: " + command);
-		try {
+		command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
+		System.out.println("In handleCommand: " + command + " " + command.length());
+		String statement = command.substring(0, 3);
+		String operand = null;
+		if (command.length() > 3) {
+			operand = command.substring(3, command.length());
+		} 
+		
+		
+		System.out.println(statement + " " + operand);
 
-				switch (command) {
-				case "upload": {
-					performUpload();
-					break;
-				}
-				case "remove": {
-					System.out.println("Received command REMOVE");
-					performRemove();
-					break;
-				}
+		switch (statement) {
 
-				case "download": {
-					performDownload();
-					break;
-				}
-				case "listOfFiles": {
-					showListOfFiles();
-					break;
-				}
-
-				}
-			
+		case "UPL": {
+			performUpload(operand);
+			break;
+		}
+		case "RMV": {
+			System.out.println("Received command REMOVE");
+			performRemove(operand);
+			break;
 		}
 
-		catch (IOException ex) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+		case "DNL": {
+			try {
+				performDownload(operand);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
 		}
+		case "LST": {
+			showListOfFiles();
+			break;
+		}
+		default: {
+			System.out.println("Unknown command.");
+		}
+
+		}
+
 	}
 
-	private void performUpload() {
+	private void performUpload(String operand) {
 
 		FileOutputStream fos = null;
 		try {
@@ -120,36 +136,31 @@ public class ClientHandler {
 		}
 	}
 
-	private void performRemove() {
-		try {
-			File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
-			if (Objects.isNull(file) || file.getName().length() == 0) {
-				instatntWriningIntoStream("There is no such a file");
-				return;
-			}
-			if (file.exists()) {
-				boolean fileDeleted = file.delete();
-				if (fileDeleted) {
-					instatntWriningIntoStream("File " + file.getName() + " was deleted.");
-				} else {
-					instatntWriningIntoStream("File " + file.getName() + " was NOT deleted.");
-				}
-			} else {
-				instatntWriningIntoStream("File does not exist.");
-			}
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+	private void performRemove(String filename) {
+		if (Objects.isNull(filename)) {
+			return;
 		}
-
-		catch (IOException ex) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+		System.out.println("performRemove()");
+		File file = new File("/media/sergei/Linux/ServerFiles" + File.separator + filename);
+		if (Objects.isNull(file) || file.getName().length() == 0) {
+			instatntWriningIntoStream("There is no such a file");
+			return;
+		}
+		if (file.exists()) {
+			boolean fileDeleted = file.delete();
+			if (fileDeleted) {
+				instatntWriningIntoStream("File " + file.getName() + " was deleted.");
+			} else {
+				instatntWriningIntoStream("File " + file.getName() + " was NOT deleted.");
+			}
+		} else {
+			instatntWriningIntoStream("File does not exist.");
 		}
 	}
 
-	private void performDownload() throws IOException {
+	private void performDownload(String operand) throws IOException {
 		System.out.println("performDownload() BEGIN");
-		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + in.readUTF());
+		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println(sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
@@ -157,8 +168,7 @@ public class ClientHandler {
 		System.out.println(fileSystem);
 		FileChannel outputChannel = FileChannel.open(sourcePath);
 		System.out.println("outputChannel: " + outputChannel);
-		
-		
+
 		ByteChannel destinationChannel = SocketChannel.open(hostAddress);
 		ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
@@ -191,7 +201,7 @@ public class ClientHandler {
 		return qtyBuffers;
 	}
 
-	private void showListOfFiles() {
+	private  void showListOfFiles() {
 		File dir = new File("/media/sergei/Linux/ServerFiles/");
 		File[] allFiles = dir.listFiles();
 		StringBuffer listOfFiles = new StringBuffer();
@@ -200,17 +210,28 @@ public class ClientHandler {
 			listOfFiles.append(oneFile).append("\n");
 			System.out.println(oneFile);
 		}
-		instatntWriningIntoStream(listOfFiles.toString());
+		//instatntWriningIntoStream(listOfFiles.toString());
+		String list = listOfFiles.toString();
+		//list = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(list);
+		ByteBuffer byteBuffer = AuxiliaryMethods.convertStringToByteBuffer(list);
+		byteBuffer.limit(list.length());
+		 try {
+			servedClient.write(byteBuffer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 
 	}
 
 	private void instatntWriningIntoStream(String message) {
-		try {
-			out.writeUTF(message);
-			out.flush();
-		} catch (IOException e) {
-			Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, e);
-		}
+		System.out.println(message);
+		ByteBuffer buffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(message);
+		
+			//out.writeUTF(message);
+			//out.flush();
+		
 
 	}
 }

@@ -115,8 +115,8 @@ public class Client implements Runnable {
 	protected String deleteFile(String filename) {
 		String status = null;
 		try {
-			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("remove"));
-			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("RMV" + filename));
+			//client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer(filename));
 			// out.writeUTF("remove");
 			// out.writeUTF(filename);
 			// status = in.readUTF();
@@ -131,7 +131,12 @@ public class Client implements Runnable {
 	protected String downloadFile(String filename) {
 		System.out.println("downloadFile BEGIN");
 		filename = auxiliary.AuxiliaryMethods.handleInputFromTextArea(filename);
-
+		try {
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("DNL" + filename));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		System.out.println("Fetching: " + filename);
 		try {
 			// out.writeUTF("download");
@@ -190,6 +195,18 @@ public class Client implements Runnable {
 	}
 
 	protected String showListOfFiles() {
+		
+		try {
+			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("LST"));
+			ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+			client.read(byteBuffer);
+			byteBuffer.flip();
+			gui.informUser(auxiliary.AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
+			System.out.println(AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		 * try {
 		 * 
