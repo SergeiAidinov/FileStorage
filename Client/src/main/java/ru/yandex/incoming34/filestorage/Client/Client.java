@@ -33,9 +33,6 @@ import java.util.regex.Pattern;
 import auxiliary.AuxiliaryMethods;
 
 public class Client implements Runnable {
-	// private final SocketChannel socket;
-	// private final DataInputStream in;
-	// private final DataOutputStream out;
 	private ByteChannel writeUtilityChannel;
 	private ByteChannel readUtilityChannel;
 	InetSocketAddress hostAddress;
@@ -89,7 +86,7 @@ public class Client implements Runnable {
 				buffer.clear();
 			}
 			sourceChannel.close();
-			System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
+			System.out.println("FINISHED. Transmitted " + transmittedBytes + " bytes.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

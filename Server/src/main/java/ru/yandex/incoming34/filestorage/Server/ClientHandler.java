@@ -39,8 +39,7 @@ import auxiliary.AuxiliaryMethods;
 /**
  * Обработчик входящих клиентов
  */
-public class ClientHandler /* implements Runnable */ {
-	// private final Socket socket;
+public class ClientHandler {
 	private DataOutputStream out;
 	private DataInputStream in;
 	private ByteChannel writeUtilityChannel;
@@ -128,7 +127,6 @@ public class ClientHandler /* implements Runnable */ {
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 				if (receivedBytes >= lengthOfExpectedFile) {
-					// buffer = null;
 					break;
 				}
 			}
@@ -188,7 +186,6 @@ public class ClientHandler /* implements Runnable */ {
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
-			// buffer.clear();
 		}
 		sourceChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
@@ -226,15 +223,5 @@ public class ClientHandler /* implements Runnable */ {
 	private void instatntWriningIntoStream(String message) {
 		System.out.println(message);
 		ByteBuffer buffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(message);
-
-		// out.writeUTF(message);
-		// out.flush();
-
 	}
-
-	/*
-	 * @Override public void run() { // TODO Auto-generated method stub
-	 * 
-	 * }
-	 */
 }

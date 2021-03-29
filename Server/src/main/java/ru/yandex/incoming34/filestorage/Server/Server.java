@@ -77,7 +77,8 @@ public class Server {
 					} else if (oneKey.isWritable()) {
 						SocketChannel client = (SocketChannel) oneKey.channel();
 						if (tramsmission != 1) {
-							client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("You have connected to server " + Server.class));
+							client.write(auxiliary.AuxiliaryMethods
+									.convertStringToByteBuffer("You have connected to server " + Server.class));
 							tramsmission++;
 						}
 
