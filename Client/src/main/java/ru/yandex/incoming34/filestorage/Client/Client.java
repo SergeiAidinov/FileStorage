@@ -148,8 +148,9 @@ public class Client implements Runnable {
 			if (!targetFile.exists()) {
 				targetFile.createNewFile();
 			}
-			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
+			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+			//targetFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, 16384);
+			
 			/*
 			ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 			serverSocketChannel.socket().bind(new InetSocketAddress(1237));
@@ -166,27 +167,33 @@ public class Client implements Runnable {
 					+ sourceChannel.getRemoteAddress());
 */
 			ByteBuffer buffer = ByteBuffer.allocate(256);
-			ByteBuffer tempBuffer = ByteBuffer.allocate(256);
-
+			//ByteBuffer tempBuffer = ByteBuffer.allocate(256);
+			
+		
 			long receivedBytes = 0;
 			long anotherLong = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
-			System.out.println("Expecting " + anotherLong +" bytes.");
-			tempBuffer.clear();
-			while ((receivedBytes != anotherLong)) {
-				buffer.clear();
+			System.out.println("Received " + receivedBytes + " bytes. Expecting " + anotherLong +" bytes.");
+			//tempBuffer.clear();
+			buffer.clear();
+			while ((true)) {
 				client.read(buffer);
 				buffer.flip();
+				//buffer.compact();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
+				//AuxiliaryMethods.writeLongToChannel(receivedBytes, client);
+				buffer.clear();
+				
 				if (receivedBytes >= anotherLong) {
 					break;
 				}
+				
 			}
 			//sourceChannel.close();
 			//serverSocketChannel.close();
 			targetFileChannel.close();
 			//auxiliaryChannel.close();
-			buffer = null;
+			//buffer = null;
 			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 
 		} catch (IOException e) {

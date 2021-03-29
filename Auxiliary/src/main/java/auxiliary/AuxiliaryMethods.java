@@ -48,7 +48,7 @@ public class AuxiliaryMethods {
 	}
 
 	public static long readLongFromChannel(ByteChannel channel) {
-		ByteBuffer tempBuffer = ByteBuffer.allocate(256);
+		ByteBuffer tempBuffer = ByteBuffer.allocate(1024);
 		try {
 			channel.read(tempBuffer);
 		} catch (IOException e) {
@@ -58,6 +58,7 @@ public class AuxiliaryMethods {
 		tempBuffer.flip();
 		byte[] tempByte = tempBuffer.array();
 		long anotherLong = auxiliary.AuxiliaryMethods.convertByteArrayToLong(tempByte);
+		tempBuffer = null;
 		return anotherLong;
 	}
 

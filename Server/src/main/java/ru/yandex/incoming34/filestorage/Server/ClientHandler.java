@@ -39,7 +39,7 @@ import auxiliary.AuxiliaryMethods;
 /**
  * Обработчик входящих клиентов
  */
-public class ClientHandler {
+public class ClientHandler /*implements Runnable */{
 	// private final Socket socket;
 	private DataOutputStream out;
 	private DataInputStream in;
@@ -63,6 +63,7 @@ public class ClientHandler {
 		 * Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
 		 * }
 		 */
+		//run();
 
 	}
 
@@ -171,30 +172,43 @@ public class ClientHandler {
 		System.out.println("sourcePath: " + sourcePath);
 		FileSystem fileSystem = FileSystems.getDefault();
 		System.out.println(fileSystem);
-		FileChannel outputChannel = FileChannel.open(sourcePath);
-		System.out.println("outputChannel: " + outputChannel);
+		FileChannel sourceChannel = FileChannel.open(sourcePath);
+		System.out.println("sourceChannel: " + sourceChannel);
+		
 
-		ByteChannel destinationChannel = SocketChannel.open(hostAddress);
-		ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
+		//ByteChannel destinationChannel = SocketChannel.open(hostAddress);
+		//ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long sizeOfsourceFile = sourceFile.length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
-				+ outputChannel + " to " + destinationChannel);
+				+ sourceChannel + " to " + servedClient);
 
 		buffer.flip();
 		long transmittedBytes = 0;
-		long bytesToTransmit = outputChannel.size();
-		auxiliary.AuxiliaryMethods.writeLongToChannel(bytesToTransmit, servedClient);
-		while (transmittedBytes < bytesToTransmit) {
-			outputChannel.read(buffer);
+		
+		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
+		//ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(1024);
+		//auxiliaryBuffer.putLong(sizeOfsourceFile);
+		//servedClient.write(auxiliaryBuffer);
+		while (transmittedBytes < sizeOfsourceFile) {
+			sourceChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
 			buffer.clear();
+			/*
+			long response = AuxiliaryMethods.readLongFromChannel(servedClient);
+			System.out.println("RecievedBytes: " + response);
+			while (true) {
+				if (transmittedBytes > response) {
+					continue;
+				}
+			}
+			*/
 		}
-		outputChannel.close();
-		destinationChannel.close();
-		auxiliaryChannel.close();
+		sourceChannel.close();
+		//destinationChannel.close();
+		//auxiliaryChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 
@@ -237,4 +251,12 @@ public class ClientHandler {
 		// out.flush();
 
 	}
+
+	/*
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+*/
 }
