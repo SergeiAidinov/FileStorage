@@ -112,17 +112,12 @@ public class Client implements Runnable {
 			long receivedBytes = 0;
 			long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
-			while ((true)) {
+			while (!(receivedBytes >= expectedLengthOfFile)) {
 				buffer.clear();
 				client.read(buffer);
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
-
-				if (receivedBytes >= expectedLengthOfFile) {
-					break;
-				}
-
 			}
 			buffer.clear();
 			targetFileChannel.close();
