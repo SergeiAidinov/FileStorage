@@ -35,7 +35,7 @@ public class Server {
 		while (true) {
 			int numReadyChannels = selector.select();
 			if (numReadyChannels == 0)
-				continue; // there are no ready channels to process
+				continue;
 			Set<SelectionKey> selectedKeys = selector.selectedKeys();
 			Iterator<SelectionKey> iterator = selectedKeys.iterator();
 
@@ -43,19 +43,18 @@ public class Server {
 				ServerSocketChannel server = null;
 				SelectionKey oneKey = iterator.next();
 				if (!oneKey.isValid()) {
-					// continue;
+					continue;
 				}
 				if (oneKey.isAcceptable()) {
 					server = (ServerSocketChannel) oneKey.channel();
 					SocketChannel client = server.accept();
-					
+
 					if (client == null) {
 						continue;
 					}
-					client.configureBlocking(false); // must be nonblocking
-					// Register socket channel with selector for read operations.
-					//client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-					client.register(selector, (SelectionKey.OP_READ | SelectionKey.OP_WRITE), new ClientHandler(client));
+					client.configureBlocking(false);
+					client.register(selector, (SelectionKey.OP_READ | SelectionKey.OP_WRITE),
+							new ClientHandler(client));
 					System.out.println("Accepted " + server + " Client: " + client);
 
 				} else {
@@ -67,11 +66,11 @@ public class Server {
 							String command = AuxiliaryMethods.readStringFromByteBuffer(buffer);
 							command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
 							if (command.length() != 0) {
-							System.out.println("Command: " + command);
-							ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
-							System.out.println("clientHandler: " + clientHandler.getClass());
-							clientHandler.handleCommand(command);
-							buffer.clear();
+								System.out.println("Command: " + command);
+								ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
+								System.out.println("clientHandler: " + clientHandler.getClass());
+								clientHandler.handleCommand(command);
+								buffer.clear();
 							}
 						}
 
@@ -81,19 +80,11 @@ public class Server {
 							client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Good bye developer!"));
 							tramsmission++;
 						}
-						// System.out.println("Transmitted: Good bye developer!");
 
 					}
 				}
 
-				/*
-				 * if (key.isValid()) {
-				 * System.out.println(auxiliary.AuxiliaryMethods.readLongFromChannel(
-				 * socketChannel)); }
-				 */
-				// server.close();
 				iterator.remove();
-				// System.out.println("Cycle!");
 			}
 		}
 	}

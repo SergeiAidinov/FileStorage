@@ -52,18 +52,7 @@ public class ClientHandler /* implements Runnable */ {
 	public ClientHandler(SocketChannel client) {
 		servedClient = client;
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
-		// try {
-		// writeUtilityChannel = SocketChannel.open(hostAddress);
-		// readUtilityChannel = SocketChannel.open(hostAddress);
-		// out = new DataOutputStream(server.getOutputStream());
-		// in = new DataInputStream(server.getInputStream());
 		System.out.println("ClientHandler created!");
-		/*
-		 * } catch (IOException ex) {
-		 * Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-		 * }
-		 */
-		// run();
 
 	}
 
@@ -95,7 +84,6 @@ public class ClientHandler /* implements Runnable */ {
 			performRemove(operand);
 			break;
 		}
-
 		case "DNL": {
 			try {
 				performDownload(operand);
@@ -112,48 +100,44 @@ public class ClientHandler /* implements Runnable */ {
 		default: {
 			System.out.println("Unknown command.");
 		}
-
 		}
-
 	}
 
 	private void performUpload(String operand) {
-
+		long lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
 		Path targetPath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println("targetPath: " + targetPath);
 		File targetFile = new File(targetPath.toString());
-		
+
 		try {
-			
-		if (!targetFile.exists()) {
+
+			if (!targetFile.exists()) {
 				targetFile.createNewFile();
-		}
-		targetFile.setWritable(true);
-		FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
-		ByteBuffer buffer = ByteBuffer.allocate(256);
-		long receivedBytes = 0;
-		long anotherLong = AuxiliaryMethods.readLongFromChannel(servedClient);
-		System.out.println("Expecting file of " + anotherLong + " bytes.");
-		while ((true)) {
-			servedClient.read(buffer);
-			buffer.flip();
-			receivedBytes += buffer.limit();
-
-			targetFileChannel.write(buffer);
-
-			if (receivedBytes >= anotherLong) {
-				break;
 			}
-		}
-		targetFileChannel.close();
-		System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
+			targetFile.setWritable(true);
+			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+			ByteBuffer buffer = ByteBuffer.allocate(256);
+			long receivedBytes = 0;
+			
+			System.out.println("Expecting file of " + lengthOfExpectedFile + " bytes.");
+			while ((true)) {
+				buffer.clear();
+				servedClient.read(buffer);
+				buffer.flip();
+				receivedBytes += buffer.limit();
+				targetFileChannel.write(buffer);
+				if (receivedBytes >= lengthOfExpectedFile) {
+					buffer = null;
+					break;
+				}
+			}
+			targetFileChannel.close();
+			System.out.println("downloadFile END. Received " + receivedBytes + " bytes.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-		
-	
 
 	private void performRemove(String filename) { // working
 		if (Objects.isNull(filename)) {
@@ -181,44 +165,31 @@ public class ClientHandler /* implements Runnable */ {
 	private void performDownload(String operand) throws IOException {
 		System.out.println("performDownload() BEGIN with operand " + operand);
 		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + operand);
-		System.out.println(sourceFile);
+		System.out.println("sourceFile: " + sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
 		FileSystem fileSystem = FileSystems.getDefault();
 		System.out.println(fileSystem);
 		FileChannel sourceChannel = FileChannel.open(sourcePath);
 		System.out.println("sourceChannel: " + sourceChannel);
-
-		// ByteChannel destinationChannel = SocketChannel.open(hostAddress);
-		// ByteChannel auxiliaryChannel = SocketChannel.open(hostAddress);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
-		long sizeOfsourceFile = sourceFile.length();
+		long sizeOfsourceFile = sourceFile.getCanonicalFile().length();
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ sourceChannel + " to " + servedClient);
 
-		buffer.flip();
 		long transmittedBytes = 0;
 
 		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
 
 		while (transmittedBytes < sizeOfsourceFile) {
+			buffer.clear();
 			sourceChannel.read(buffer);
 			buffer.flip();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
-			buffer.clear();
-
-			/*
-			 * long response = AuxiliaryMethods.readLongFromChannel(servedClient);
-			 * System.out.println("RecievedBytes: " + response); while (true) { if
-			 * (transmittedBytes > response) { continue; } }
-			 */
-
+			//buffer.clear();
 		}
-
 		sourceChannel.close();
-		// destinationChannel.close();
-		// auxiliaryChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 	}
 
@@ -239,9 +210,7 @@ public class ClientHandler /* implements Runnable */ {
 			listOfFiles.append(oneFile).append("\n");
 			System.out.println(oneFile);
 		}
-		// instatntWriningIntoStream(listOfFiles.toString());
 		String list = listOfFiles.toString();
-		// list = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(list);
 		ByteBuffer byteBuffer = AuxiliaryMethods.convertStringToByteBuffer(list);
 		byteBuffer.limit(list.length());
 		try {

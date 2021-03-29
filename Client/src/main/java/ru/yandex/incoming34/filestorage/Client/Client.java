@@ -45,26 +45,8 @@ public class Client implements Runnable {
 	public Client() throws IOException {
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
 		gui = new GraphicUserInterface(this);
-		// socket = new Socket("localhost", 1237);
 		client = SocketChannel.open();
 		client.connect(hostAddress);
-
-		/*
-		 * in = new DataInputStream(socket.getInputStream()); out = new
-		 * DataOutputStream(socket.getOutputStream()); SocketChannel sc =
-		 * SocketChannel.open(); InetSocketAddress addr = new
-		 * InetSocketAddress("localhost", port); sc.connect(addr);
-		 */
-		writeUtilityChannel = client.open();
-
-		readUtilityChannel = client.open();
-		long lg = (long) (Math.random() * 10000000);
-		// auxiliary.AuxiliaryMethods.writeLongToChannel(lg, client);
-		// auxiliary.AuxiliaryMethods.writeStringToChannel("Hello, developer", client);
-		// client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello
-		// developer!"));
-		// client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("Hello lazy
-		// developer!"));
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		client.read(buffer);
 		buffer.flip();
@@ -77,10 +59,12 @@ public class Client implements Runnable {
 	}
 
 	protected String sendFile(File sourceFile) {
+		System.out.println(sourceFile);
 		System.out.println("Sending file: " + sourceFile);
 		try {
+			long sizeOfsourceFile = sourceFile.length();
 			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("UPL" + sourceFile.getName()));
-			auxiliary.AuxiliaryMethods.writeLongToChannel(sourceFile.length(), client);
+			auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, client);
 
 			Path sourcePath = Paths.get(sourceFile.getAbsolutePath());
 			System.out.println("sourcePath: " + sourcePath);
@@ -90,7 +74,7 @@ public class Client implements Runnable {
 			System.out.println("sourceChannel: " + sourceChannel);
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 
-			long sizeOfsourceFile = sourceFile.length();
+			
 			System.out.println("Uploading file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 					+ sourceChannel + " to " + client);
 
@@ -101,24 +85,12 @@ public class Client implements Runnable {
 				sourceChannel.read(buffer);
 				buffer.flip();
 				client.write(buffer);
-
-				//buffer.flip();
 				transmittedBytes += buffer.limit();
-				// client.write(buffer);
 				buffer.clear();
-
-				/*
-				 * long response = AuxiliaryMethods.readLongFromChannel(servedClient);
-				 * System.out.println("RecievedBytes: " + response); while (true) { if
-				 * (transmittedBytes > response) { continue; } }
-				 */
-
 			}
-
 			sourceChannel.close();
 
-			// destinationChannel.close();
-			// auxiliaryChannel.close();
+			sourceChannel.close();
 			System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -197,7 +169,7 @@ public class Client implements Runnable {
 
 		try {
 			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("LST"));
-			ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+			ByteBuffer byteBuffer = ByteBuffer.allocate(256);
 			client.read(byteBuffer);
 			byteBuffer.flip();
 			gui.informUser(auxiliary.AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
@@ -221,7 +193,7 @@ public class Client implements Runnable {
 			return "There is no such a file!";
 		}
 		sendFile(file);
-		return "Sending file: " + file;
+		return "Choosen  file: " + file;
 		// }
 
 	}
