@@ -15,7 +15,8 @@ import java.util.Objects;
 
 import com.sun.security.ntlm.Server;
 
-import auxiliary.AuxiliaryMethods;
+
+//import auxiliary.AuxiliaryMethods;
 
 public class Client implements Runnable {
 	InetSocketAddress hostAddress;
@@ -30,7 +31,7 @@ public class Client implements Runnable {
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		client.read(buffer);
 		buffer.flip();
-		System.out.println("You have connected to server" + Server.class.getSimpleName());
+		System.out.println("You have connected to server" + Server.class);
 	}
 
 	protected String sendFileToServer(File sourceFile) {
@@ -110,14 +111,18 @@ public class Client implements Runnable {
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			long receivedBytes = 0;
-			long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
+			long expectedLengthOfFile = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
-			while (!(receivedBytes >= expectedLengthOfFile)) {
+			while (receivedBytes < expectedLengthOfFile) {
 				buffer.clear();
 				client.read(buffer);
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
+				buffer.clear();
+				if(receivedBytes >= expectedLengthOfFile) {
+					break;
+				}
 			}
 			buffer.clear();
 			targetFileChannel.close();
@@ -140,7 +145,7 @@ public class Client implements Runnable {
 			client.read(byteBuffer);
 			byteBuffer.flip();
 			gui.informUser(auxiliary.AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
-			System.out.println(AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
+			System.out.println(auxiliary.AuxiliaryMethods.readStringFromByteBuffer(byteBuffer));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

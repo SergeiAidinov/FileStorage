@@ -174,8 +174,12 @@ public class ClientHandler {
 			buffer.clear();
 			sourceChannel.read(buffer);
 			buffer.flip();
+			buffer.rewind();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
+			if (transmittedBytes >= sizeOfsourceFile) {
+				break;
+			}
 		}
 		sourceChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
