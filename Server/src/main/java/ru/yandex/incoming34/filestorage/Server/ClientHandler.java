@@ -3,6 +3,7 @@ package ru.yandex.incoming34.filestorage.Server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
@@ -22,19 +23,26 @@ public class ClientHandler {
 	InetSocketAddress hostAddress;//
 	int port = 1237;
 	SocketChannel servedClient;
-	private  boolean busy = false;
-	
+	private boolean busy = false;
+	ServerSocket auxiliaryServerSocket = null;
+
 	public ClientHandler(SocketChannel client) {
-		
+
 		servedClient = client;
 		hostAddress = new InetSocketAddress(auxiliary.Constants.hostName, auxiliary.Constants.port);
+		try {
+			servedClient.configureBlocking(false);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("ClientHandler created!");
 	}
-	
+
 	public boolean getBusy() {
 		return busy;
 	}
-	
+
 	public void handleCommand(String command) {
 		if (Objects.isNull(command)) {
 			return;
@@ -90,8 +98,8 @@ public class ClientHandler {
 	private void receiveFileFromClient(String operand) {
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		long lengthOfExpectedFile = 0;
-		while (lengthOfExpectedFile == 0){
-		lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
+		while (lengthOfExpectedFile == 0) {
+			lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
 		}
 		Path targetPath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println("targetPath: " + targetPath);
@@ -113,6 +121,7 @@ public class ClientHandler {
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
+
 				if (receivedBytes >= lengthOfExpectedFile) {
 					break;
 				}
@@ -169,10 +178,15 @@ public class ClientHandler {
 		long transmittedBytes = 0;
 
 		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
-
+		// auxiliaryServerSocket.accept();
+		ByteBuffer auxBuffer = ByteBuffer.allocate(3);
+		String response = null;
 		while (transmittedBytes < sizeOfsourceFile) {
 			buffer.clear();
 			sourceChannel.read(buffer);
+			if (sizeOfsourceFile - transmittedBytes < 256) {
+				buffer.limit((int) (sizeOfsourceFile - transmittedBytes));
+			}
 			buffer.flip();
 			buffer.rewind();
 			transmittedBytes += buffer.limit();
@@ -180,7 +194,21 @@ public class ClientHandler {
 			if (transmittedBytes >= sizeOfsourceFile) {
 				break;
 			}
+			while (true) {
+				buffer.clear();
+				servedClient.read(buffer);
+				buffer.flip();
+				buffer.rewind();
+				response = AuxiliaryMethods.readStringFromByteBuffer(buffer);
+					if (response.equals("SNB")) {
+						System.out.println(response);
+						break;
+					}
+			}
+			System.out.println("Transmitted: " + transmittedBytes + " bytes.");
+
 		}
+		buffer.clear();
 		sourceChannel.close();
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
 		busy = false;

@@ -15,6 +15,8 @@ import java.util.Objects;
 
 import com.sun.security.ntlm.Server;
 
+import auxiliary.AuxiliaryMethods;
+
 
 //import auxiliary.AuxiliaryMethods;
 
@@ -99,7 +101,7 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println("Fetching: " + filename);
+		System.out.println("Fetching: " + filename + " " + filename.length());
 		try {
 			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			System.out.println("targetPath: " + targetPath);
@@ -113,16 +115,32 @@ public class Client implements Runnable {
 			long receivedBytes = 0;
 			long expectedLengthOfFile = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
-			while (receivedBytes < expectedLengthOfFile) {
+			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(3);
+			while (true /*receivedBytes < expectedLengthOfFile*/) 
+			//for (int i = 0; i < (expectedLengthOfFile/256 +1); i++)
+			{
 				buffer.clear();
 				client.read(buffer);
+				if (expectedLengthOfFile -receivedBytes <256) {
+					buffer.limit((int) (expectedLengthOfFile -receivedBytes));
+				}
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 				buffer.clear();
+				System.out.println("Received " + receivedBytes + " bytes.");
+				
 				if(receivedBytes >= expectedLengthOfFile) {
+					System.out.println("BREAK");
 					break;
 				}
+				
+				//client.write(auxiliaryBuffer);
+				auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
+				client.write(auxiliaryBuffer);
+				
+				//System.out.println("Written: " + AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer));
+				
 			}
 			buffer.clear();
 			targetFileChannel.close();
