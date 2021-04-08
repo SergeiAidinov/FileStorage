@@ -17,7 +17,6 @@ import com.sun.security.ntlm.Server;
 
 import auxiliary.AuxiliaryMethods;
 
-
 //import auxiliary.AuxiliaryMethods;
 
 public class Client implements Runnable {
@@ -116,32 +115,27 @@ public class Client implements Runnable {
 			long expectedLengthOfFile = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
 			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(3);
-			while (true /*receivedBytes < expectedLengthOfFile*/) 
-			//for (int i = 0; i < (expectedLengthOfFile/256 +1); i++)
-			{
+			auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
+			while (true){
 				buffer.clear();
 				client.read(buffer);
-				if (expectedLengthOfFile -receivedBytes <256) {
-					buffer.limit((int) (expectedLengthOfFile -receivedBytes));
+				if (expectedLengthOfFile - receivedBytes < 256) {
+					buffer.limit((int) (expectedLengthOfFile - receivedBytes));
 				}
 				buffer.flip();
 				receivedBytes += buffer.limit();
 				targetFileChannel.write(buffer);
 				buffer.clear();
 				System.out.println("Received " + receivedBytes + " bytes.");
-				
-				if(receivedBytes >= expectedLengthOfFile) {
+				if (receivedBytes >= expectedLengthOfFile) {
 					System.out.println("BREAK");
 					break;
 				}
-				
-				//client.write(auxiliaryBuffer);
 				auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
 				client.write(auxiliaryBuffer);
 				
-				//System.out.println("Written: " + AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer));
-				
 			}
+			auxiliaryBuffer.clear();
 			buffer.clear();
 			targetFileChannel.close();
 			System.out.println("FILE DOWNLOADED. Received " + receivedBytes + " bytes.");

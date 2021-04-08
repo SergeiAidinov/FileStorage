@@ -66,7 +66,6 @@ public class Server {
 							String command = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
 							command = AuxiliaryMethods.leaveOnlyMeaningfullSymbols(command);
 							auxiliaryBuffer.clear();
-							//iterator.remove();
 							if (command.length() != 0) {
 								ClientHandler clientHandler = (ClientHandler) oneKey.attachment();
 								System.out.println("Command: " + command);
