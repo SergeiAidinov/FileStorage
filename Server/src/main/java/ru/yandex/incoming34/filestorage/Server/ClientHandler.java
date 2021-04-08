@@ -75,13 +75,8 @@ public class ClientHandler {
 			break;
 		}
 		case "DNL": {
-			try {
-				busy = true;
-				sendFileToClient(operand);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			busy = true;
+			sendFileToClient(operand);
 			break;
 		}
 		case "LST": {
@@ -159,58 +154,105 @@ public class ClientHandler {
 		busy = false;
 	}
 
-	private void sendFileToClient(String operand) throws IOException {
+	private void sendFileToClient(String operand)  {
 		System.out.println("performDownload() BEGIN with operand " + operand);
 		File sourceFile = new File("/media/sergei/Linux/ServerFiles" + File.separator + operand);
 		System.out.println("sourceFile: " + sourceFile);
 		Path sourcePath = Paths.get("/media/sergei/Linux/ServerFiles" + File.separator + sourceFile.getName());
 		System.out.println("sourcePath: " + sourcePath);
-		FileSystem fileSystem = FileSystems.getDefault();
-		System.out.println(fileSystem);
-		FileChannel sourceChannel = FileChannel.open(sourcePath);
+		// FileSystem fileSystem = FileSystems.getDefault();
+		// System.out.println(fileSystem);
+		FileChannel sourceChannel;
+		try {
+			sourceChannel = FileChannel.open(sourcePath);
+		
 		System.out.println("sourceChannel: " + sourceChannel);
 		ByteBuffer buffer = ByteBuffer.allocate(256);
+		//ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
 		long sizeOfsourceFile = sourceFile.length();
-		AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
+		//AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
+		//auxiliaryBuffer.putLong(sizeOfsourceFile);
+		//servedClient.write(auxiliaryBuffer);
 		System.out.println("Transmitting file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 				+ sourceChannel + " to " + servedClient);
 
 		long transmittedBytes = 0;
 
 		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
-		//ByteBuffer auxBuffer = ByteBuffer.allocate(3);
+		
 		String response = null;
+		
 		while (true) {
 			if (transmittedBytes >= sizeOfsourceFile) {
 				break;
 			}
+			awaitForRequest();
+			if(sizeOfsourceFile - transmittedBytes < 256) {
+				buffer = ByteBuffer.allocate((int)(sizeOfsourceFile - transmittedBytes));
+			}
 			buffer.clear();
 			sourceChannel.read(buffer);
-			if (sizeOfsourceFile - transmittedBytes < 256) {
-				buffer.limit((int) (sizeOfsourceFile - transmittedBytes));
+			//buffer.compact();
+			informClientOfBufferSize(buffer);
+			
+			if (transmittedBytes >= sizeOfsourceFile) {
+				break;
 			}
 			buffer.flip();
-			buffer.rewind();
-			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
-			while (true) {
-				buffer.clear();
-				servedClient.read(buffer);
-				buffer.flip();
-				buffer.rewind();
-				response = AuxiliaryMethods.readStringFromByteBuffer(buffer);
-				if (response.equals("SNB")) {
-					System.out.println(response);
-					break;
-				}
-			}
+			transmittedBytes += buffer.limit();
+			buffer.rewind();
 			System.out.println("Transmitted: " + transmittedBytes + " bytes.");
 
 		}
+		
+		
 		buffer.clear();
 		sourceChannel.close();
+		
 		System.out.println("performDownload() FINISHED. Transmitted " + transmittedBytes + " bytes.");
-		busy = false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void informClientOfBufferSize(ByteBuffer buffer) {
+		String info = "BFO" + buffer.limit();
+		System.out.println("info: " + info);
+		ByteBuffer auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(info);
+		try {
+			servedClient.write(auxiliaryBuffer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		auxiliaryBuffer.clear();
+		
+		
+		
+	}
+
+	private void awaitForRequest() {
+		String response = null;
+		while (true) {
+			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
+			auxiliaryBuffer.clear();
+			try {
+				servedClient.read(auxiliaryBuffer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			auxiliaryBuffer.flip();
+			auxiliaryBuffer.rewind();
+			response = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
+			if (response.equals("SNB")) {
+				System.out.println(response);
+				break;
+			}
+		}
+		
 	}
 
 	private long calculateQuantityOfBuffers(File oneFile, ByteBuffer oneBuffer) {

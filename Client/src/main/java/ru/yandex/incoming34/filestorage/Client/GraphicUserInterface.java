@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -50,7 +51,12 @@ public class GraphicUserInterface {
 			System.out.println(myClient.deleteFile(textArea.getText()));
 		});
 		downloadButton.addActionListener(dnl -> {
-			System.out.println(myClient.receiveFileFromServer(textArea.getText()));
+			try {
+				System.out.println(myClient.receiveFileFromServer(textArea.getText()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		});
 		listOfFiles.addActionListener(lst -> {
 			System.out.println(myClient.showListOfFiles());

@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
+import org.checkerframework.checker.index.qual.SubstringIndexBottom;
+
 import com.sun.security.ntlm.Server;
 
 import auxiliary.AuxiliaryMethods;
@@ -91,7 +93,7 @@ public class Client implements Runnable {
 		return status;
 	}
 
-	protected String receiveFileFromServer(String filename) {
+	protected String receiveFileFromServer(String filename) throws IOException {
 		System.out.println("downloadFile BEGIN");
 		filename = auxiliary.AuxiliaryMethods.handleInputFromTextArea(filename);
 		try {
@@ -101,7 +103,7 @@ public class Client implements Runnable {
 			e1.printStackTrace();
 		}
 		System.out.println("Fetching: " + filename + " " + filename.length());
-		try {
+		
 			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
 			System.out.println("targetPath: " + targetPath);
 			File targetFile = new File(targetPath.toString());
@@ -112,41 +114,84 @@ public class Client implements Runnable {
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
 			ByteBuffer buffer = ByteBuffer.allocate(256);
 			long receivedBytes = 0;
-			long expectedLengthOfFile = auxiliary.AuxiliaryMethods.readLongFromChannel(client);
+			long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
-			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(3);
-			auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
-			while (true){
-				buffer.clear();
-				client.read(buffer);
-				if (expectedLengthOfFile - receivedBytes < 256) {
-					buffer.limit((int) (expectedLengthOfFile - receivedBytes));
-				}
-				buffer.flip();
-				receivedBytes += buffer.limit();
-				targetFileChannel.write(buffer);
-				buffer.clear();
-				System.out.println("Received " + receivedBytes + " bytes.");
+			int expectedSizeOfBuffer = 0;
+			while (true) {
 				if (receivedBytes >= expectedLengthOfFile) {
 					System.out.println("BREAK");
 					break;
-				}
-				auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
-				client.write(auxiliaryBuffer);
-				
 			}
-			auxiliaryBuffer.clear();
+				requestBuffer();
+					ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
+					client.read(auxiliaryBuffer);
+					auxiliaryBuffer.flip();
+					auxiliaryBuffer.rewind();
+					String bufferInfo = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
+					System.out.println("bufferInfo: " + bufferInfo);
+					expectedSizeOfBuffer = parseexpectedSizeOfBuffer(bufferInfo);
+					buffer = ByteBuffer.allocate(expectedSizeOfBuffer);
+				buffer.clear();
+				client.read(buffer); // Reading buffer
+				//buffer.compact();
+				if (buffer.limit() != expectedSizeOfBuffer) {
+					requestBuffer();
+					System.out.println("Buffer rejected!");
+					continue;
+				} else {
+					if (expectedLengthOfFile - receivedBytes < 256) {
+						//buffer.limit((int) (expectedLengthOfFile - receivedBytes));
+						//buffer.compact();
+					}
+					if (receivedBytes >= expectedLengthOfFile) {
+						System.out.println("BREAK");
+						break;
+				}
+					buffer.flip();
+					targetFileChannel.write(buffer);
+					receivedBytes += buffer.limit();
+					buffer.clear();
+					System.out.println("Received " + receivedBytes + " bytes.");
+					if (receivedBytes >= expectedLengthOfFile) {
+						System.out.println("BREAK");
+						break;
+
+			}
+			}
+			}
+			//auxiliaryBuffer.clear();
 			buffer.clear();
 			targetFileChannel.close();
 			System.out.println("FILE DOWNLOADED. Received " + receivedBytes + " bytes.");
 
+
+		return filename;
+
+	}
+
+	private int parseexpectedSizeOfBuffer(String bufferInfo) {
+		int expectedSizeOfBuffer = 0;
+		if (bufferInfo.length() > 1) {
+			String command = bufferInfo.substring(0, 3);
+			String parameter = bufferInfo.substring(3, bufferInfo.length());
+			System.out.println(command);
+			System.out.println(parameter);
+			expectedSizeOfBuffer = Integer.parseInt(parameter);
+			System.out.println("Expecting buffer of " + expectedSizeOfBuffer + " bytes.");
+			
+		}
+		return expectedSizeOfBuffer;
+	}
+
+	private void requestBuffer() {
+		ByteBuffer requestBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
+		try {
+			client.write(requestBuffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		return filename;
-
+		
 	}
 
 	protected String showListOfFiles() {
