@@ -178,22 +178,11 @@ public class ClientHandler {
 		long transmittedBytes = 0;
 
 		auxiliary.AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
+		//ByteBuffer auxBuffer = ByteBuffer.allocate(3);
 		String response = null;
 		while (true) {
 			if (transmittedBytes >= sizeOfsourceFile) {
 				break;
-			} else {
-				while (true) {
-					buffer.clear();
-					servedClient.read(buffer);
-					buffer.flip();
-					buffer.rewind();
-					response = AuxiliaryMethods.readStringFromByteBuffer(buffer);
-					if (response.equals("SNB")) {
-						System.out.println(response);
-						break;
-					}
-				}
 			}
 			buffer.clear();
 			sourceChannel.read(buffer);
@@ -204,7 +193,17 @@ public class ClientHandler {
 			buffer.rewind();
 			transmittedBytes += buffer.limit();
 			servedClient.write(buffer);
-			buffer.clear();
+			while (true) {
+				buffer.clear();
+				servedClient.read(buffer);
+				buffer.flip();
+				buffer.rewind();
+				response = AuxiliaryMethods.readStringFromByteBuffer(buffer);
+				if (response.equals("SNB")) {
+					System.out.println(response);
+					break;
+				}
+			}
 			System.out.println("Transmitted: " + transmittedBytes + " bytes.");
 
 		}

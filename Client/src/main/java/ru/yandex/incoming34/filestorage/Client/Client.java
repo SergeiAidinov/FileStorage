@@ -116,37 +116,24 @@ public class Client implements Runnable {
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
 			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(3);
 			auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
-			while (true) {
-
-				 
-					auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
-					client.write(auxiliaryBuffer);
-					System.out.println("SNB");
-
-				
-
+			while (true){
 				buffer.clear();
 				client.read(buffer);
-				// buffer.compact();
 				if (expectedLengthOfFile - receivedBytes < 256) {
 					buffer.limit((int) (expectedLengthOfFile - receivedBytes));
 				}
 				buffer.flip();
-				ByteBuffer tempBuffer = buffer;
-				//tempBuffer.flip();
-				tempBuffer.compact();
-				if (tempBuffer.limit() == buffer.limit()) {
-					receivedBytes += buffer.limit();
-					targetFileChannel.write(buffer);
-				}
-
-				//buffer.clear();
+				receivedBytes += buffer.limit();
+				targetFileChannel.write(buffer);
+				buffer.clear();
 				System.out.println("Received " + receivedBytes + " bytes.");
 				if (receivedBytes >= expectedLengthOfFile) {
 					System.out.println("BREAK");
-					//auxiliaryBuffer.clear();
 					break;
 				}
+				auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
+				client.write(auxiliaryBuffer);
+				
 			}
 			auxiliaryBuffer.clear();
 			buffer.clear();
