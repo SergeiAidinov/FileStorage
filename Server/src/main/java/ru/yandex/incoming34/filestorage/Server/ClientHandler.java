@@ -183,26 +183,23 @@ public class ClientHandler {
 		String response = null;
 		
 		while (true) {
-			if (transmittedBytes >= sizeOfsourceFile) {
-				break;
-			}
-			awaitForRequest();
+			
+			buffer.clear();
+			
 			if(sizeOfsourceFile - transmittedBytes < 256) {
 				buffer = ByteBuffer.allocate((int)(sizeOfsourceFile - transmittedBytes));
 			}
-			buffer.clear();
-			sourceChannel.read(buffer);
-			//buffer.compact();
-			informClientOfBufferSize(buffer);
 			
-			if (transmittedBytes >= sizeOfsourceFile) {
-				break;
-			}
-			buffer.flip();
 			servedClient.write(buffer);
 			transmittedBytes += buffer.limit();
-			buffer.rewind();
+			System.out.println("Transmitting buffer of " + buffer.limit() + " bytes.");
+			//buffer.rewind();
+			//buffer.clear();
 			System.out.println("Transmitted: " + transmittedBytes + " bytes.");
+			if (transmittedBytes > sizeOfsourceFile ) {
+				break;
+			}
+			
 
 		}
 		

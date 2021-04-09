@@ -103,67 +103,44 @@ public class Client implements Runnable {
 			e1.printStackTrace();
 		}
 		System.out.println("Fetching: " + filename + " " + filename.length());
-		
-			Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
-			System.out.println("targetPath: " + targetPath);
-			File targetFile = new File(targetPath.toString());
-			targetFile.setWritable(true);
-			if (!targetFile.exists()) {
-				targetFile.createNewFile();
-			}
-			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
-			ByteBuffer buffer = ByteBuffer.allocate(256);
-			long receivedBytes = 0;
-			long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
-			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
-			int expectedSizeOfBuffer = 0;
-			while (true) {
-				if (receivedBytes >= expectedLengthOfFile) {
-					System.out.println("BREAK");
-					break;
-			}
-				requestBuffer();
-					ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
-					client.read(auxiliaryBuffer);
-					auxiliaryBuffer.flip();
-					auxiliaryBuffer.rewind();
-					String bufferInfo = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
-					System.out.println("bufferInfo: " + bufferInfo);
-					expectedSizeOfBuffer = parseexpectedSizeOfBuffer(bufferInfo);
-					buffer = ByteBuffer.allocate(expectedSizeOfBuffer);
-				buffer.clear();
-				client.read(buffer); // Reading buffer
-				//buffer.compact();
-				if (buffer.limit() != expectedSizeOfBuffer) {
-					requestBuffer();
-					System.out.println("Buffer rejected!");
-					continue;
-				} else {
-					if (expectedLengthOfFile - receivedBytes < 256) {
-						//buffer.limit((int) (expectedLengthOfFile - receivedBytes));
-						//buffer.compact();
-					}
-					if (receivedBytes >= expectedLengthOfFile) {
-						System.out.println("BREAK");
-						break;
-				}
-					buffer.flip();
-					targetFileChannel.write(buffer);
-					receivedBytes += buffer.limit();
-					buffer.clear();
-					System.out.println("Received " + receivedBytes + " bytes.");
-					if (receivedBytes >= expectedLengthOfFile) {
-						System.out.println("BREAK");
-						break;
 
-			}
-			}
-			}
-			//auxiliaryBuffer.clear();
+		Path targetPath = Paths.get("/media/sergei/Linux/ClientFiles" + File.separator + filename);
+		System.out.println("targetPath: " + targetPath);
+		File targetFile = new File(targetPath.toString());
+		targetFile.setWritable(true);
+		if (!targetFile.exists()) {
+			targetFile.createNewFile();
+		}
+		FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		long receivedBytes = 0;
+		long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
+		System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
+		int expectedSizeOfBuffer = 0;
+		while (true) {
+
 			buffer.clear();
-			targetFileChannel.close();
-			System.out.println("FILE DOWNLOADED. Received " + receivedBytes + " bytes.");
+			client.read(buffer); // Reading buffer
+			if ((expectedLengthOfFile - receivedBytes) < 256) {
+				buffer.limit((int) (expectedLengthOfFile - receivedBytes));
+				
+			}
+			System.out.println("Receiving buffer of " + buffer.limit() + " bytes.");
+			buffer.flip();
+			targetFileChannel.write(buffer);
+			receivedBytes += buffer.limit();
 
+			System.out.println("Received " + receivedBytes + " bytes.");
+			if (receivedBytes > expectedLengthOfFile) {
+				System.out.println("BREAK");
+				break;
+			}
+
+		}
+		// auxiliaryBuffer.clear();
+		buffer.clear();
+		targetFileChannel.close();
+		System.out.println("FILE DOWNLOADED. Received " + receivedBytes + " bytes.");
 
 		return filename;
 
@@ -178,7 +155,7 @@ public class Client implements Runnable {
 			System.out.println(parameter);
 			expectedSizeOfBuffer = Integer.parseInt(parameter);
 			System.out.println("Expecting buffer of " + expectedSizeOfBuffer + " bytes.");
-			
+
 		}
 		return expectedSizeOfBuffer;
 	}
@@ -191,7 +168,7 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	protected String showListOfFiles() {
