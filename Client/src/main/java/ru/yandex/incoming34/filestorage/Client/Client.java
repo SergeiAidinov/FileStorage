@@ -18,6 +18,7 @@ import org.checkerframework.checker.index.qual.SubstringIndexBottom;
 import com.sun.security.ntlm.Server;
 
 import auxiliary.AuxiliaryMethods;
+import auxiliary.Constants;
 
 //import auxiliary.AuxiliaryMethods;
 
@@ -31,7 +32,7 @@ public class Client implements Runnable {
 		gui = new GraphicUserInterface(this);
 		client = SocketChannel.open();
 		client.connect(hostAddress);
-		ByteBuffer buffer = ByteBuffer.allocate(256);
+		ByteBuffer buffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 		client.read(buffer);
 		buffer.flip();
 		System.out.println("You have connected to server" + Server.class);
@@ -51,7 +52,7 @@ public class Client implements Runnable {
 			System.out.println(fileSystem);
 			FileChannel sourceChannel = FileChannel.open(sourcePath);
 			System.out.println("sourceChannel: " + sourceChannel);
-			ByteBuffer buffer = ByteBuffer.allocate(256);
+			ByteBuffer buffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 			System.out.println("Uploading file " + sourceFile + " of " + sizeOfsourceFile + " bytes " + "from "
 					+ sourceChannel + " to " + client);
 
@@ -112,7 +113,7 @@ public class Client implements Runnable {
 				targetFile.createNewFile();
 			}
 			FileChannel targetFileChannel = FileChannel.open(targetPath, StandardOpenOption.WRITE);
-			ByteBuffer buffer = ByteBuffer.allocate(256);
+			ByteBuffer buffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 			long receivedBytes = 0;
 			long expectedLengthOfFile = AuxiliaryMethods.readLongFromChannel(client);
 			System.out.println("Expecting file of " + expectedLengthOfFile + " bytes.");
@@ -139,8 +140,8 @@ public class Client implements Runnable {
 					System.out.println("Buffer rejected!");
 					continue;
 				} else {
-					if (expectedLengthOfFile - receivedBytes < 256) {
-						//buffer.limit((int) (expectedLengthOfFile - receivedBytes));
+					if (expectedLengthOfFile - receivedBytes < Constants.defaultBufferSize) {
+						buffer.limit((int) (expectedLengthOfFile - receivedBytes));
 						//buffer.compact();
 					}
 					if (receivedBytes >= expectedLengthOfFile) {
@@ -195,7 +196,7 @@ public class Client implements Runnable {
 	}
 
 	protected String showListOfFiles() {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(256);
+		ByteBuffer byteBuffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 		try {
 			client.write(auxiliary.AuxiliaryMethods.convertStringToByteBuffer("LST"));
 

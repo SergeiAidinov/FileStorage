@@ -15,6 +15,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
 import auxiliary.AuxiliaryMethods;
+import auxiliary.Constants;
 
 /**
  * Обработчик входящих клиентов
@@ -91,7 +92,7 @@ public class ClientHandler {
 	}
 
 	private void receiveFileFromClient(String operand) {
-		ByteBuffer buffer = ByteBuffer.allocate(256);
+		ByteBuffer buffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 		long lengthOfExpectedFile = 0;
 		while (lengthOfExpectedFile == 0) {
 			lengthOfExpectedFile = AuxiliaryMethods.readLongFromChannel(servedClient);
@@ -167,7 +168,7 @@ public class ClientHandler {
 			sourceChannel = FileChannel.open(sourcePath);
 		
 		System.out.println("sourceChannel: " + sourceChannel);
-		ByteBuffer buffer = ByteBuffer.allocate(256);
+		ByteBuffer buffer = ByteBuffer.allocate(Constants.defaultBufferSize);
 		//ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
 		long sizeOfsourceFile = sourceFile.length();
 		//AuxiliaryMethods.writeLongToChannel(sizeOfsourceFile, servedClient);
@@ -187,7 +188,7 @@ public class ClientHandler {
 				break;
 			}
 			awaitForRequest();
-			if(sizeOfsourceFile - transmittedBytes < 256) {
+			if(sizeOfsourceFile - transmittedBytes < Constants.defaultBufferSize) {
 				buffer = ByteBuffer.allocate((int)(sizeOfsourceFile - transmittedBytes));
 			}
 			buffer.clear();
