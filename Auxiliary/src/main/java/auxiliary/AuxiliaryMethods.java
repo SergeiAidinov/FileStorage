@@ -3,6 +3,7 @@ package auxiliary;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
@@ -94,6 +95,87 @@ public class AuxiliaryMethods {
 			e.printStackTrace();
 		}
 		byteBuffer.clear();
+	}
+
+	public static void informCounterpartOfBufferSize(ByteBuffer buffer, SocketChannel channel) {
+		String info = "BFO" + buffer.limit();
+		System.out.println("info: " + info);
+		ByteBuffer auxiliaryBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(info);
+		try {
+			channel.write(auxiliaryBuffer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		auxiliaryBuffer.clear();
+	}
+
+	public static void awaitForRequestFromCounterpart(SocketChannel channel, String notice) {
+		String response = null;
+		while (true) {
+			ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
+			auxiliaryBuffer.clear();
+			try {
+				channel.read(auxiliaryBuffer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			auxiliaryBuffer.flip();
+			auxiliaryBuffer.rewind();
+			response = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryBuffer);
+			if (response.equals(Constants.noticeForSendingNextBuffer)) {
+				System.out.println(response);
+				auxiliaryBuffer.clear();
+				break;
+			}
+		}
+
+	}
+
+	public static int parseexpectedSizeOfBuffer(String bufferInfo) {
+		int expectedSizeOfBuffer = 0;
+		if (bufferInfo.length() > 1) {
+			String command = bufferInfo.substring(0, 3);
+			String parameter = bufferInfo.substring(3, bufferInfo.length());
+			System.out.println(command);
+			System.out.println(parameter);
+			expectedSizeOfBuffer = Integer.parseInt(parameter);
+			System.out.println("Detected buffer of " + expectedSizeOfBuffer + " bytes.");
+
+		}
+		return expectedSizeOfBuffer;
+	}
+
+	public static void requestBuffer(SocketChannel channel, String notice) {
+		ByteBuffer requestBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(notice);
+		try {
+			channel.write(requestBuffer);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String getInformedOfBufferSize(SocketChannel channel) {
+		ByteBuffer auxiliaryInputBuffer = ByteBuffer.allocate(128);
+		ByteBuffer auxiliaryOutputBuffer = AuxiliaryMethods.convertStringToByteBuffer("INFORMED");
+		String bufferInfo = null;
+		try {
+			do {
+				auxiliaryInputBuffer.clear();
+				channel.read(auxiliaryInputBuffer);
+				auxiliaryInputBuffer.flip();
+				// auxiliaryBuffer.rewind();
+				bufferInfo = AuxiliaryMethods.readStringFromByteBuffer(auxiliaryInputBuffer);
+
+			} while (bufferInfo.length() == 0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
