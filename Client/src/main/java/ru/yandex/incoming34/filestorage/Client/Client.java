@@ -20,7 +20,7 @@ import com.sun.security.ntlm.Server;
 import auxiliary.AuxiliaryMethods;
 import auxiliary.Constants;
 
-//import auxiliary.AuxiliaryMethods;
+import auxiliary.AuxiliaryMethods;
 
 public class Client implements Runnable {
 	InetSocketAddress hostAddress;
@@ -60,7 +60,14 @@ public class Client implements Runnable {
 			long transmittedBytes = 0;
 
 			while (transmittedBytes < sizeOfsourceFile) {
+				buffer.clear();
+				if ((sizeOfsourceFile - transmittedBytes) < Constants.defaultBufferSize) {
+					buffer.allocate((int) (sizeOfsourceFile - transmittedBytes));
+				}
+				//AuxiliaryMethods.awaitForRequestFromCounterpart(client, Constants.noticeForSendingNextBuffer);
 				sourceChannel.read(buffer);
+				//AuxiliaryMethods.informCounterpartOfBufferSize(buffer, client);
+				AuxiliaryMethods.awaitForRequestFromCounterpart(client, Constants.noticeForSendingNextBuffer);
 				buffer.flip();
 				client.write(buffer);
 				transmittedBytes += buffer.limit();
@@ -123,7 +130,7 @@ public class Client implements Runnable {
 					System.out.println("BREAK");
 					break;
 			}
-				requestBuffer();
+				requestBuffer(client, Constants.noticeForSendingNextBuffer);
 					ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(128);
 					client.read(auxiliaryBuffer);
 					auxiliaryBuffer.flip();
@@ -136,7 +143,7 @@ public class Client implements Runnable {
 				client.read(buffer); // Reading buffer
 				//buffer.compact();
 				if (buffer.limit() != expectedSizeOfBuffer) {
-					requestBuffer();
+					requestBuffer(client, Constants.noticeForSendingNextBuffer);
 					System.out.println("Buffer rejected!");
 					continue;
 				} else {
@@ -184,10 +191,10 @@ public class Client implements Runnable {
 		return expectedSizeOfBuffer;
 	}
 
-	private void requestBuffer() {
-		ByteBuffer requestBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer("SNB");
+	private void requestBuffer(SocketChannel channel, String notice) {
+		ByteBuffer requestBuffer = auxiliary.AuxiliaryMethods.convertStringToByteBuffer(notice);
 		try {
-			client.write(requestBuffer);
+			channel.write(requestBuffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
